@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:puppeteer/puppeteer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class CommonUtils {
@@ -52,6 +50,7 @@ class CommonUtils {
     }
   }
 
+/*
 //https://peter.sh/experiments/chromium-command-line-switches/#net-log
   static Future<(Browser, Page,bool)> runBrowser({required String url, required String keyname,bool forceShowBrowser=false, Function(Request)? onRequest, Function(Response)? onResponse}) async {
     try {
@@ -131,4 +130,5 @@ class CommonUtils {
     }
     return path.split('/').last.split('.').last;
   }
+  */
 }

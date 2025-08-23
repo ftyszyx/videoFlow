@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:videoflow/services/app_config_services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -6,11 +9,19 @@ import 'package:path/path.dart' as path;
 
 enum LogLevel { debug, info, warn, error }
 
-class LoggerService {
+class DebugLogModel {
+  final String content;
+  final DateTime datetime;
+  final Color? color;
+  DebugLogModel(this.datetime, this.content, {this.color});
+}
+
+class Log {
   // --- Singleton Setup ---
-  static final LoggerService _instance = LoggerService._internal();
-  factory LoggerService() => _instance;
-  LoggerService._internal();
+  static final Log _instance = Log._internal();
+  static final RxList<DebugLogModel> debugLogs = <DebugLogModel>[].obs;
+  factory Log() => _instance;
+  Log._internal();
 
   // --- Configuration ---
   LogLevel _currentLevel = LogLevel.info;
@@ -64,11 +75,26 @@ class LoggerService {
     _log(level: LogLevel.error, message: fullMessage, color: _red, stackTrace: stackTrace ?? StackTrace.current);
   }
 
+  Color getColor(LogLevel level) {
+    switch (level) {
+      case LogLevel.error:
+        return Colors.red;
+      case LogLevel.warn:
+        return Colors.yellow;
+      case LogLevel.info:
+        return Colors.green;
+      default:
+        return Colors.blue;
+    }
+  }
+
   void _log({required LogLevel level, required String message, required String color, StackTrace? stackTrace}) {
     if (level.index < _currentLevel.index) {
       return;
     }
-
+    if(!kReleaseMode){
+      debugLogs.add(DebugLogModel(DateTime.now(), message, color: getColor(level)));
+    }
     String callerInfo = '';
     if (stackTrace != null) {
       if (level == LogLevel.error) {
@@ -134,4 +160,4 @@ class LoggerService {
 }
 
 // Global instance for easy access
-final logger = LoggerService(); 
+final logger = Log(); 
