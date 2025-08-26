@@ -9,6 +9,8 @@ import 'package:videoflow/modules/task/task_page.dart';
 import 'package:videoflow/modules/set/set_control.dart';
 import 'package:videoflow/modules/set/set_page.dart';
 import 'package:videoflow/utils/route_path.dart';
+import 'package:videoflow/modules/account/kuaishou/qr_login_page.dart';
+import 'package:videoflow/modules/account/kuaishou/qr_login_control.dart';
 
 class MenuItem {
   final String title;
@@ -51,6 +53,13 @@ class AppPages {
       page: () => const SetPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => SetControl());
+      }),
+    ),
+    GetPage(
+      name: RoutePath.kuaishouQrLogin,
+      page: () => const KuaishouQrLoginPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => KuaiShouWebLoginControl());
       }),
     ),
   ];

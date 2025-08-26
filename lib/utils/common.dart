@@ -4,6 +4,23 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class CommonUtils {
   static late PackageInfo packageInfo;
+
+  static Map<String, String> cookieAdd(
+    Map<String, String> cookie,
+    String value,
+  ) {
+    var cookieArr = value.split(";");
+    for (var cookieItem in cookieArr) {
+      if (cookieItem.isNotEmpty) {
+        var keyvalue = cookieItem.split("=");
+        if (keyvalue.length == 2) {
+          cookie[keyvalue[0]] = keyvalue[1];
+        }
+      }
+    }
+    return cookie;
+  }
+
   static String formatSize(int sizeInBytes) {
     if (sizeInBytes < 1024) {
       return '$sizeInBytes B';
@@ -50,7 +67,7 @@ class CommonUtils {
     }
   }
 
-/*
+  /*
 //https://peter.sh/experiments/chromium-command-line-switches/#net-log
   static Future<(Browser, Page,bool)> runBrowser({required String url, required String keyname,bool forceShowBrowser=false, Function(Request)? onRequest, Function(Response)? onResponse}) async {
     try {

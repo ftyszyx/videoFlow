@@ -41,6 +41,7 @@ dependencies:
   lottie: ^1.4.3 #lottie动画
   dynamic_color: ^1.8.1
   remixicon: ^1.4.1
+  flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
   flutter_test:

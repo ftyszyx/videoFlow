@@ -8,6 +8,7 @@ import 'package:videoflow/models/db/account.dart';
 import 'package:videoflow/models/db/video_tassk.dart';
 import 'package:videoflow/modules/log/debug_log_page.dart';
 import 'package:videoflow/routes/app_pages.dart';
+import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/services/app_config_services.dart';
 import 'package:videoflow/utils/common.dart';
@@ -20,14 +21,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:videoflow/widgets/status/app_loading_widget.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initWindow();
+  var appDocsDir = await getApplicationSupportDirectory();
   await Hive.initFlutter(
     (!Platform.isAndroid && !Platform.isIOS)
-        ? (await getApplicationSupportDirectory()).path
+        ? appDocsDir.path
         : null,
   );
   await initServices();
@@ -55,11 +55,11 @@ Future initServices() async {
   Hive.registerAdapter(VideoTasskAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
   await Get.put(AppConfigServices()).init();
+  await Get.put(AccountService()).init();
   await logger.initialize();
   await Hive.openBox<Account>('accounts');
   await Hive.openBox<VideoTassk>('tasks');
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -68,99 +68,103 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     Color styleColor = Colors.blue;
     return DynamicColorBuilder(
-        builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-      ColorScheme? lightColorScheme;
-      ColorScheme? darkColorScheme;
-      if (lightDynamic != null && darkDynamic != null) {
-        lightColorScheme = lightDynamic;
-        darkColorScheme = darkDynamic;
-      } else {
-        lightColorScheme = ColorScheme.fromSeed(
-          seedColor: styleColor,
-          brightness: Brightness.light,
-        );
-        darkColorScheme = ColorScheme.fromSeed(
-            seedColor: styleColor, brightness: Brightness.dark);
-      }
-      return GetMaterialApp(
-        title: "Video Flow",
-        theme: ThemeData(colorScheme: lightColorScheme),
-        darkTheme: ThemeData(colorScheme: darkColorScheme),
-        themeMode: ThemeMode.light,
-        initialRoute: RoutePath.indexed,
-        getPages: AppPages.routes,
-        //国际化
-        locale: const Locale("zh", "CN"),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale("zh", "CN")],
-        logWriterCallback: (text, {bool? isError}) {
-          if(isError ?? false){
-            logger.e(text);
-          }else{
-            logger.i(text);
-          }
-        },
-        //debugShowCheckedModeBanner: false,
-        navigatorObservers: [FlutterSmartDialog.observer],
-        builder: FlutterSmartDialog.init(
-          loadingBuilder: ((msg) => const AppLoadingWidget()),
-          //字体大小不跟随系统变化
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: const TextScaler.linear(1.0)),
-            child: Stack(
-              children: [
-                //侧键返回
-                RawGestureDetector(
-                  excludeFromSemantics: true,
-                  child: KeyboardListener(
-                    focusNode: FocusNode(),
-                    onKeyEvent: (KeyEvent event) async {
-                      if (event is KeyDownEvent &&
-                          event.logicalKey == LogicalKeyboardKey.escape) {
-                        // ESC退出全屏
-                        // 如果处于全屏状态，退出全屏
-                        if (!Platform.isAndroid && !Platform.isIOS) {
-                          if (await windowManager.isFullScreen()) {
-                            await windowManager.setFullScreen(false);
-                            return;
+      builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        ColorScheme? lightColorScheme;
+        ColorScheme? darkColorScheme;
+        if (lightDynamic != null && darkDynamic != null) {
+          lightColorScheme = lightDynamic;
+          darkColorScheme = darkDynamic;
+        } else {
+          lightColorScheme = ColorScheme.fromSeed(
+            seedColor: styleColor,
+            brightness: Brightness.light,
+          );
+          darkColorScheme = ColorScheme.fromSeed(
+            seedColor: styleColor,
+            brightness: Brightness.dark,
+          );
+        }
+        return GetMaterialApp(
+          title: "Video Flow",
+          theme: ThemeData(colorScheme: lightColorScheme),
+          darkTheme: ThemeData(colorScheme: darkColorScheme),
+          themeMode: ThemeMode.light,
+          initialRoute: RoutePath.indexed,
+          getPages: AppPages.routes,
+          //国际化
+          locale: const Locale("zh", "CN"),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale("zh", "CN")],
+          logWriterCallback: (text, {bool? isError}) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (isError ?? false) {
+              logger.e(text);
+              } else {
+                logger.i(text);
+              }
+            });
+          },
+          //debugShowCheckedModeBanner: false,
+          navigatorObservers: [FlutterSmartDialog.observer],
+          builder: FlutterSmartDialog.init(
+            loadingBuilder: ((msg) => const AppLoadingWidget()),
+            //字体大小不跟随系统变化
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.0)),
+              child: Stack(
+                children: [
+                  //侧键返回
+                  RawGestureDetector(
+                    excludeFromSemantics: true,
+                    child: KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (KeyEvent event) async {
+                        if (event is KeyDownEvent &&
+                            event.logicalKey == LogicalKeyboardKey.escape) {
+                          // ESC退出全屏
+                          // 如果处于全屏状态，退出全屏
+                          if (!Platform.isAndroid && !Platform.isIOS) {
+                            if (await windowManager.isFullScreen()) {
+                              await windowManager.setFullScreen(false);
+                              return;
+                            }
                           }
                         }
-                      }
-                    },
-                    child: child!,
+                      },
+                      child: child!,
+                    ),
                   ),
-                ),
 
-                //查看DEBUG日志按钮
-                //只在Debug、Profile模式显示
-                Visibility(
-                  visible: !kReleaseMode,
-                  child: Positioned(
-                    right: 12,
-                    bottom: 100 + context.mediaQueryViewPadding.bottom,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: ElevatedButton(
-                        child: const Text("DEBUG LOG"),
-                        onPressed: () {
-                          Get.bottomSheet(
-                            const DebugLogPage(),
-                          );
-                        },
+                  //查看DEBUG日志按钮
+                  //只在Debug、Profile模式显示
+                  Visibility(
+                    visible: !kReleaseMode,
+                    child: Positioned(
+                      right: 12,
+                      bottom: 100 + context.mediaQueryViewPadding.bottom,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: ElevatedButton(
+                          child: const Text("DEBUG LOG"),
+                          onPressed: () {
+                            Get.bottomSheet(const DebugLogPage());
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    }));
+        );
+      }),
+    );
   }
 }
