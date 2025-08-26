@@ -57,8 +57,8 @@ Future initServices() async {
   await Get.put(AppConfigServices()).init();
   await Get.put(AccountService()).init();
   await logger.initialize();
-  await Hive.openBox<Account>('accounts');
-  await Hive.openBox<VideoTassk>('tasks');
+  // await Hive.openBox<Account>('accounts');
+  // await Hive.openBox<VideoTassk>('tasks');
 }
 
 class MyApp extends StatelessWidget {

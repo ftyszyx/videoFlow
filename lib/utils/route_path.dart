@@ -6,4 +6,5 @@ class RoutePath {
 
   static const String kuaishouQrLogin = '/kuaishou/qr_login';
   static const String xiaodianQrLogin = '/xiaodian/qr_login';
+  static const String hiveDebug = '/debug/hive';
 }

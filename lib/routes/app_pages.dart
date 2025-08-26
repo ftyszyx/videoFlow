@@ -11,20 +11,33 @@ import 'package:videoflow/modules/set/set_page.dart';
 import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/modules/account/kuaishou/qr_login_page.dart';
 import 'package:videoflow/modules/account/kuaishou/qr_login_control.dart';
+import 'package:videoflow/modules/debug/hive_debug_page.dart';
 
 class MenuItem {
   final String title;
   final int index;
   final IconData icon;
-  MenuItem({required this.title, required this.index, required this.icon});
+  final String routeName;
+  MenuItem({required this.title, required this.index, required this.icon, required this.routeName});
 }
 
 class AppPages {
   AppPages._();
   static final Map<String, MenuItem> menuItems = {
-    RoutePath.account: MenuItem(title: 'Account', index: 0, icon: Icons.person),
-    RoutePath.task: MenuItem(title: 'Task', index: 1, icon: Icons.task),
-    RoutePath.settings: MenuItem(title: 'Settings', index: 2, icon: Icons.settings),
+    RoutePath.account: MenuItem(title: 'Account', index: 0, icon: Icons.person, routeName: RoutePath.account),
+    RoutePath.task: MenuItem(title: 'Task', index: 1, icon: Icons.task, routeName: RoutePath.task),
+    RoutePath.settings: MenuItem(
+      title: 'Settings',
+      index: 2,
+      icon: Icons.settings,
+      routeName: RoutePath.settings,
+    ),
+    RoutePath.hiveDebug: MenuItem(
+      title: 'Hive Debug',
+      index: 3,
+      icon: Icons.bug_report,
+      routeName: RoutePath.hiveDebug,
+    ),
   };
   static final routes = [
     GetPage(
@@ -62,5 +75,6 @@ class AppPages {
         Get.lazyPut(() => KuaiShouWebLoginControl());
       }),
     ),
+    GetPage(name: RoutePath.hiveDebug, page: () => const HiveDebugPage()),
   ];
 }
