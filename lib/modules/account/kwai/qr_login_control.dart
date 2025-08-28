@@ -10,12 +10,13 @@ import 'package:videoflow/utils/logger.dart';
 import 'package:videoflow/utils/requests/http_client.dart';
 import 'package:videoflow/entity/kuaishou.dart';
 
-class KuaiShouWebLoginControl extends BaseControl {
+class KuaiShouQrLoginControl extends BaseControl {
   Rx<QRStatus> qrStatus = QRStatus.loading.obs;
-  final sid = "kuaishou.server.webday7";
+  final KwaiQrVariant _variant;
   var qrStartData = QrStartData().obs;
   Timer? timer;
   String? accountId;
+  KuaiShouQrLoginControl(this._variant);
 
   @override
   void onInit() {
@@ -28,6 +29,15 @@ class KuaiShouWebLoginControl extends BaseControl {
   void onClose() {
     super.onClose();
     timer?.cancel();
+  }
+
+  String getPlatformTitle() {
+    switch (_variant.platform) {
+      case KuaishouPlatform.kuaishou:
+        return "快手";
+      case KuaishouPlatform.shop:
+        return "小店";
+    }
   }
 
   void startPoll() {
@@ -44,12 +54,13 @@ class KuaiShouWebLoginControl extends BaseControl {
       var dio = HttpClient.instance.dio;
       logger.i("do pull status");
       var result = await dio.post(
-        "https://id.kuaishou.com/rest/c/infra/ks/qr/scanResult",
+        "${_variant.qrHost}/rest/c/infra/ks/qr/scanResult",
         queryParameters: {
           "qrLoginToken": qrStartData.value.qrLoginToken,
           "qrLoginSignature": qrStartData.value.qrLoginSignature,
-          "sid": sid,
+          "sid": _variant.sid,
           "channelType": "UNKNOWN",
+          ..._variant.otherParams,
         },
         options: Options(responseType: ResponseType.json),
       );
@@ -81,12 +92,13 @@ class KuaiShouWebLoginControl extends BaseControl {
     try {
       var dio = HttpClient.instance.dio;
       var result = await dio.post(
-        "https://id.kuaishou.com/rest/c/infra/ks/qr/acceptResult",
+        "${_variant.qrHost}/rest/c/infra/ks/qr/acceptResult",
         queryParameters: {
           "qrLoginToken": qrStartData.value.qrLoginToken,
           "qrLoginSignature": qrStartData.value.qrLoginSignature,
-          "sid": qrStartData.value.sid,
+          "sid": _variant.sid,
           "channelType": "UNKNOWN",
+          ..._variant.otherParams,
         },
       );
       var resCode = result.data["result"];
@@ -108,11 +120,12 @@ class KuaiShouWebLoginControl extends BaseControl {
     try {
       var dio = HttpClient.instance.dio;
       var response = await dio.post(
-        "https://id.kuaishou.com/pass/kuaishou/login/qr/callback",
+        "${_variant.qrHost}/pass/kuaishou/login/qr/callback",
         queryParameters: {
           "qrToken": qrAcceptResultData.qrToken,
-          "sid": qrAcceptResultData.sid,
+          "sid": _variant.sid,
           "channelType": "UNKNOWN",
+          ..._variant.otherParams,
         },
         options: Options(responseType: ResponseType.json),
       );
@@ -127,10 +140,18 @@ class KuaiShouWebLoginControl extends BaseControl {
           }
         }
         if (cookies.isNotEmpty) {
+          if (_variant.platform == KuaishouPlatform.kuaishou) {
           await AccountService.instance.updateKuaishouCookie(
-            accountId!,
-            cookies,
-          );
+              accountId!,
+              cookies,
+            );
+          }
+          if (_variant.platform == KuaishouPlatform.shop) {
+            await AccountService.instance.updateXiaoDianCookie(
+              accountId!,
+              cookies,
+            );
+          }
         }
         return true;
       } else {
@@ -150,8 +171,12 @@ class KuaiShouWebLoginControl extends BaseControl {
       qrStatus.value = QRStatus.loading;
       var dio = HttpClient.instance.dio;
       var result = await dio.post(
-        "https://id.kuaishou.com/rest/c/infra/ks/qr/start",
-        queryParameters: {"sid": sid, "channelType": "UNKNOWN"},
+        "${_variant.qrHost}/rest/c/infra/ks/qr/start",
+        queryParameters: {
+          "sid": _variant.sid,
+          "channelType": "UNKNOWN",
+          ..._variant.otherParams,
+        },
         options: Options(responseType: ResponseType.json),
       );
       if (result.data["result"] != 1) {

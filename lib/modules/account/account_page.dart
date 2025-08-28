@@ -97,8 +97,8 @@ class AccountPage extends GetView<AccountControl> {
                   spacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    OutlinedButton(onPressed: (){ if(a.id!=null){ Get.toNamed(RoutePath.kuaishouQrLogin, parameters: {'id': a.id!}); } }, child: const Text('登录快手')),
-                    OutlinedButton(onPressed: (){ if(a.id!=null){ Get.toNamed(RoutePath.kuaishouQrLogin, parameters: {'id': a.id!}); } }, child: const Text('登录小店')),
+                    OutlinedButton(onPressed: (){ if(a.id!=null){ Get.toNamed(RoutePath.kwaiQrLogin, parameters: {'id': a.id!}); } }, child: const Text('登录快手')),
+                    OutlinedButton(onPressed: (){ if(a.id!=null){ Get.toNamed(RoutePath.shopQrLogin, parameters: {'id': a.id!}); } }, child: const Text('登录小店')),
                     IconButton(
                       tooltip: '编辑',
                       icon: const Icon(Icons.edit_outlined),

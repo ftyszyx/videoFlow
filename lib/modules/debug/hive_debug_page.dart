@@ -116,7 +116,6 @@ class _HiveDebugPageState extends State<HiveDebugPage> {
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(12),
-                          title: Text('Key: ${map['Key']}'),
                           subtitle: SelectableText(
                             text,
                             style: const TextStyle(fontFamily: 'monospace'),

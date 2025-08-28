@@ -51,6 +51,39 @@ class QrAcceptResultData {
     return QrAcceptResultData(
       qrToken: json['qrToken'] as String?,
       sid: json['sid'] as String?,
-      );
+    );
   }
 }
+
+enum KuaishouPlatform {
+  kuaishou,
+  shop;
+}
+
+class KwaiQrVariant {
+  final KuaishouPlatform platform;
+  final String qrHost;
+  final String sid;
+  final Map<String, String> otherParams;
+  const KwaiQrVariant({
+    required this.platform,
+    required this.qrHost,
+    required this.sid,
+    required this.otherParams,
+  });
+}
+
+const kuaishouQrVariant = KwaiQrVariant(
+  platform: KuaishouPlatform.kuaishou,
+  qrHost: "https://id.kuaishou.com",
+  sid: "kuaishou.server.webday7",
+  otherParams: {},
+);
+const shopQrVariant = KwaiQrVariant(
+  platform: KuaishouPlatform.shop,
+  qrHost: "https://id.kwaixiaodian.com",
+  sid: "kuaishou.shop.b",
+  otherParams: {
+    "isWebSig4":"true"
+  },
+);

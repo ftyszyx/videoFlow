@@ -1,4 +1,3 @@
-import 'package:videoflow/entity/common.dart';
 import 'dart:convert';
 
 class LiveDetail {
@@ -8,8 +7,6 @@ class LiveDetail {
   String coverUrl;
   int duration;
   int size;
-  VideoPlatform platform;
-  DownloadFileType fileType;
   LiveDetail({
     this.replayUrl = '',
     this.title = '',
@@ -17,8 +14,6 @@ class LiveDetail {
     this.coverUrl = '',
     this.duration = 0,
     this.size = 0,
-    this.platform = VideoPlatform.unknown,
-    this.fileType = DownloadFileType.unknown,
   });
   @override
   String toString() => jsonEncode({
@@ -28,7 +23,5 @@ class LiveDetail {
     'coverUrl': coverUrl,
     'duration': duration,
     'size': size,
-    'platform': platform.name,
-    'fileType': fileType.name,
   });
 }

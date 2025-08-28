@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:videoflow/entity/kuaishou.dart';
 import 'package:videoflow/modules/account/account_control.dart';
 import 'package:videoflow/modules/account/account_page.dart';
 import 'package:videoflow/modules/indexed/indexed_control.dart';
@@ -9,8 +10,8 @@ import 'package:videoflow/modules/task/task_page.dart';
 import 'package:videoflow/modules/set/set_control.dart';
 import 'package:videoflow/modules/set/set_page.dart';
 import 'package:videoflow/utils/route_path.dart';
-import 'package:videoflow/modules/account/kuaishou/qr_login_page.dart';
-import 'package:videoflow/modules/account/kuaishou/qr_login_control.dart';
+import 'package:videoflow/modules/account/kwai/qr_login_page.dart';
+import 'package:videoflow/modules/account/kwai/qr_login_control.dart';
 import 'package:videoflow/modules/debug/hive_debug_page.dart';
 
 class MenuItem {
@@ -84,10 +85,17 @@ class AppPages {
       }),
     ),
     GetPage(
-      name: RoutePath.kuaishouQrLogin,
+      name: RoutePath.kwaiQrLogin,
       page: () => const KuaishouQrLoginPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut(() => KuaiShouWebLoginControl());
+        Get.lazyPut(() => KuaiShouQrLoginControl(kuaishouQrVariant));
+      }),
+    ),
+    GetPage(
+      name: RoutePath.shopQrLogin,
+      page: () => const KuaishouQrLoginPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => KuaiShouQrLoginControl(shopQrVariant));
       }),
     ),
     GetPage(name: RoutePath.hiveDebug, page: () => const HiveDebugPage()),
