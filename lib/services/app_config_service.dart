@@ -5,9 +5,15 @@ import 'package:videoflow/utils/logger.dart';
 import 'package:path/path.dart' as path;
 import 'dart:io';
 
-class AppConfigServices extends GetxService {
+class AppConfigService extends GetxService {
   LogLevel _logLevel = LogLevel.info;
   LogLevel get logLevel => _logLevel;
+
+  late String _appDataPath;
+  String get appDataPath => _appDataPath;
+
+  late String _appCachePath;
+  String get appCachePath => _appCachePath;
 
   late String _appConfigPath;
   String get appConfigPath => _appConfigPath;
@@ -18,10 +24,11 @@ class AppConfigServices extends GetxService {
   Map<String, dynamic> _config = {};
   Map<String, dynamic> get config => _config;
 
-  static AppConfigServices get instance => Get.find<AppConfigServices>();
+  static AppConfigService get instance => Get.find<AppConfigService>();
   Future init() async {
-    var userFolder = await getApplicationSupportDirectory();
-    var appConfigPath = path.join(userFolder.path, 'config.json');
+    _appDataPath = (await getApplicationSupportDirectory()).path;
+    _appCachePath = (await getApplicationCacheDirectory()).path;
+    var appConfigPath = path.join(_appDataPath, 'config.json');
     _appConfigPath = appConfigPath;
     _isdebug = false;
     if (File(appConfigPath).existsSync()) {

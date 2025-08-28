@@ -5,12 +5,13 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:videoflow/models/db/account.dart';
-import 'package:videoflow/models/db/video_tassk.dart';
+import 'package:videoflow/models/db/video_task.dart';
 import 'package:videoflow/modules/log/debug_log_page.dart';
 import 'package:videoflow/routes/app_pages.dart';
 import 'package:videoflow/services/account_service.dart';
+import 'package:videoflow/services/url_parse/url_parse_service.dart';
 import 'package:videoflow/utils/route_path.dart';
-import 'package:videoflow/services/app_config_services.dart';
+import 'package:videoflow/services/app_config_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
 import 'package:window_manager/window_manager.dart';
@@ -54,11 +55,10 @@ Future initServices() async {
   Hive.registerAdapter(AccountAdapter());
   Hive.registerAdapter(VideoTasskAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
-  await Get.put(AppConfigServices()).init();
+  await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
+  await Get.put(UrlParseService()).init();
   await logger.initialize();
-  // await Hive.openBox<Account>('accounts');
-  // await Hive.openBox<VideoTassk>('tasks');
 }
 
 class MyApp extends StatelessWidget {

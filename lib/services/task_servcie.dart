@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'dart:async';
-import 'package:videoflow/models/db/video_tassk.dart';
+import 'package:videoflow/models/db/video_task.dart';
 
 class TaskService extends GetxService {
   static TaskService get instance => Get.find<TaskService>();

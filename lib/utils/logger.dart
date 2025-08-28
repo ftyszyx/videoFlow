@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:videoflow/services/app_config_services.dart';
+import 'package:videoflow/services/app_config_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -49,14 +49,14 @@ class Log {
     final logFile = File(path.join(_logPath, 'log_$timestamp.log'));
     _fileSink = logFile.openWrite(mode: FileMode.writeOnlyAppend);
     _isInitialized = true;
-    _currentLevel = AppConfigServices.instance.getLogLevel();
+    _currentLevel = AppConfigService.instance.getLogLevel();
     i('Logger initialized. Log level: ${_currentLevel.name}. Saving to: ${logFile.path}');
   }
 
   void setLevel(LogLevel level) {
     _currentLevel = level;
     i('Log level set to ${_currentLevel.name}');
-    AppConfigServices.instance.setLogLevel(_currentLevel);
+    AppConfigService.instance.setLogLevel(_currentLevel);
   }
 
   LogLevel get currentLevel => _currentLevel;

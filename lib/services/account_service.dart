@@ -18,6 +18,10 @@ class AccountService extends GetxService {
     return _box.values.toList();
   }
 
+  Account? getUser(String id) {
+    return _box.get(id);
+  }
+
   Future<void> put(Account account) async {
     final String key = account.id?.isNotEmpty == true
         ? account.id!
@@ -35,21 +39,30 @@ class AccountService extends GetxService {
     _changed.add(null);
   }
 
-  Future<void> updateKuaishouCookie(String id, Map<String, String> cookie) async {
-    //            //; Expires=Mon, 15 Sep 2025 14:19:47 GMT
+  Future<void> updateKuaishouCookie(
+    String id,
+    Map<String, String>? cookie,
+  ) async {
     var account = _box.get(id);
     if (account != null) {
       account.kuaishouCookie = cookie;
-      var expireTime=cookie["Expires"];
-      if(expireTime!=null){
-        account.kuaishouExpireTime=DateTime.parse(expireTime).millisecondsSinceEpoch;
+      if (cookie != null) {
+        var expireTime = cookie["Expires"];
+        if (expireTime != null) {
+          account.kuaishouExpireTime = DateTime.parse(
+            expireTime,
+          ).millisecondsSinceEpoch;
+        }
       }
       logger.i("updateKuaishouCookie: ${account.toString()}");
       await put(account);
     }
   }
 
-  Future<void> updateXiaoDianCookie(String id, Map<String, String> cookie) async {
+  Future<void> updateXiaoDianCookie(
+    String id,
+    Map<String, String> cookie,
+  ) async {
     var account = _box.get(id);
     if (account != null) {
       account.xiaoDianCookie = cookie;
