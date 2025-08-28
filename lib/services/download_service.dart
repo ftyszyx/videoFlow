@@ -12,14 +12,14 @@ import 'package:videoflow/entity/common.dart';
 class DownloadManagerService extends GetxService {
   static DownloadManagerService get instance =>
       Get.find<DownloadManagerService>();
-  final RxMap<String, VideoTassk> _downloadTasks = <String, VideoTassk>{}.obs;
+  final RxMap<String, VideoTask> _downloadTasks = <String, VideoTask>{}.obs;
   Process? _ffmpegProcess;
   init() {
     _downloadTasks.clear();
     startDownLoadLoop();
   }
 
-  bool addDownloadTask(VideoTassk task) {
+  bool addDownloadTask(VideoTask task) {
     if (task.canDownload()) {
       if (!_downloadTasks.containsKey(task.id)) {
         _downloadTasks[task.id] = task;
@@ -44,7 +44,7 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  Future<void> _startDownloadTask(VideoTassk taskinfo) async {
+  Future<void> _startDownloadTask(VideoTask taskinfo) async {
     if (taskinfo.downloadFileType == DownloadFileType.mp4) {
       await _downloadFile(taskinfo);
     } else if (taskinfo.downloadFileType == DownloadFileType.m3u8) {
@@ -56,7 +56,7 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  Future<void> _downloadFileSimple(VideoTassk task) async {
+  Future<void> _downloadFileSimple(VideoTask task) async {
     int retryCount = 0;
     while (retryCount < 3) {
       logger.i(
@@ -67,8 +67,6 @@ class DownloadManagerService extends GetxService {
           .timeout(const Duration(seconds: 60));
       if (response.statusCode == 200) {
         await File(task.downloadPath!).writeAsBytes(response.bodyBytes);
-        task.status = TaskStatus.downloadCompleted;
-        _downloadTasks.remove(task.id);
         logger.i(
           'Download file from ${task.downloadUrl} success. Save path: ${task.downloadPath}',
         );
@@ -85,14 +83,14 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  String getDownloadTmpPath(VideoTassk task) {
+  String getDownloadTmpPath(VideoTask task) {
     return path.join(
       AppConfigService.instance.appCachePath,
       '${task.id}_${task.downloadFileType?.name}',
     );
   }
 
-  Future<void> _downloadFile(VideoTassk task) async {
+  Future<void> _downloadFile(VideoTask task) async {
     final client = http.Client();
     try {
       task.status = TaskStatus.downloading;
@@ -161,7 +159,7 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  Future<void> _downloadSegments(VideoTassk task) async {
+  Future<void> _downloadSegments(VideoTask task) async {
     int chunkIndex = -1;
     int maxConcurrentDownloads = 8;
     int totalCount = task.downloadSegments!.length;
@@ -229,7 +227,7 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  Future<void> _downloadM3u8(VideoTassk task) async {
+  Future<void> _downloadM3u8(VideoTask task) async {
     task.status = TaskStatus.downloading;
     if (task.downloadSegments!.isEmpty) {
       await _parseM3u8(task);
@@ -245,7 +243,7 @@ class DownloadManagerService extends GetxService {
     _downloadTasks.remove(task.id);
   }
 
-  Future<void> _parseM3u8(VideoTassk task) async {
+  Future<void> _parseM3u8(VideoTask task) async {
     final m3u8Uri = Uri.parse(task.downloadUrl!);
     final response = await http.get(m3u8Uri);
     if (response.statusCode != 200) {
@@ -273,7 +271,7 @@ class DownloadManagerService extends GetxService {
     }
   }
 
-  Future<void> _mergeSegments(VideoTassk task) async {
+  Future<void> _mergeSegments(VideoTask task) async {
     logger.i(
       'Merge segments for task $task.id start. Temp dir: ${getDownloadTmpPath(task)}, Save path: ${task.downloadPath}',
     );

@@ -7,13 +7,13 @@ import 'package:get/get.dart';
 
 class UrlParseService extends GetxService {
   static UrlParseService get instance => Get.find<UrlParseService>();
-  final RxMap<String, VideoTassk> _parseTasks = <String, VideoTassk>{}.obs;
+  final RxMap<String, VideoTask> _parseTasks = <String, VideoTask>{}.obs;
 
   Future<void> init() async {
     startParseLoop();
   }
 
-  bool addParseTask(VideoTassk task) {
+  bool addParseTask(VideoTask task) {
     if (!_parseTasks.containsKey(task.id)) {
       _parseTasks[task.id] = task;
       return true;
@@ -33,7 +33,7 @@ class UrlParseService extends GetxService {
   }
 
   /// Parses a share text/URL to extract video details like title and m3u8 URL.
-  Future<void> _startParseUrl(VideoTassk task) async {
+  Future<void> _startParseUrl(VideoTask task) async {
     try {
       if (task.shareLink.contains('m.tb.cn')) {
         task.errMsg = '不支持的平台';

@@ -52,7 +52,7 @@ Future initWindow() async {
 
 Future initServices() async {
   Hive.registerAdapter(AccountAdapter());
-  Hive.registerAdapter(VideoTasskAdapter());
+  Hive.registerAdapter(VideoTaskAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();

@@ -9,7 +9,7 @@ import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/models/db/video_task.dart';
 
 class KuaishouParser {
-  static Future<void> parse(VideoTassk task) async {
+  static Future<void> parse(VideoTask task) async {
     final shortUrl = _extractShortUrl(task.shareLink);
     if (shortUrl == null) {
       task.errMsg = '在分享文本中找不到有效的快手短链接';
@@ -41,7 +41,7 @@ class KuaishouParser {
     return match?.group(0);
   }
 
-  static Future<void> _getRedirectUrl({required VideoTassk task}) async {
+  static Future<void> _getRedirectUrl({required VideoTask task}) async {
     Browser? browser;
     Page? page;
     Map<String, LiveDetail> responseLiveDetails = {};

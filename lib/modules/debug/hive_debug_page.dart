@@ -36,8 +36,8 @@ class _HiveDebugPageState extends State<HiveDebugPage> {
         final box = Hive.box<Account>('accounts');
         list = box.keys.map((k) => MapEntry(k, box.get(k))).toList();
       } else {
-        await _openIfNeeded<VideoTassk>('tasks');
-        final box = Hive.box<VideoTassk>('tasks');
+        await _openIfNeeded<VideoTask>('tasks');
+        final box = Hive.box<VideoTask>('tasks');
         list = box.keys.map((k) => MapEntry(k, box.get(k))).toList();
       }
       logger.i('hive debug: $_selected ${list.length}');
@@ -54,7 +54,7 @@ class _HiveDebugPageState extends State<HiveDebugPage> {
 
   Map<String, dynamic> _asMap(dynamic v) {
     if (v is Account) return v.toJson();
-    if (v is VideoTassk) return v.toJson();
+    if (v is VideoTask) return v.toJson();
     if (v is Map) return Map<String, dynamic>.from(v);
     return {'value': v?.toString()};
   }

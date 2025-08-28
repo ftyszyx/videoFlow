@@ -6,22 +6,22 @@ part of 'video_task.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class VideoTasskAdapter extends TypeAdapter<VideoTassk> {
+class VideoTaskAdapter extends TypeAdapter<VideoTask> {
   @override
   final int typeId = 2;
 
   @override
-  VideoTassk read(BinaryReader reader) {
+  VideoTask read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return VideoTassk(
-      id: fields[0] as String,
-      shareLink: fields[100] as String,
-      userId: fields[20] as String,
-      name: fields[10] as String,
-    )
+    return VideoTask(
+        id: fields[0] as String,
+        shareLink: fields[100] as String,
+        userId: fields[20] as String,
+        name: fields[10] as String,
+      )
       ..coverPath = fields[30] as String?
       ..videoTitle = fields[40] as String?
       ..subTitle = fields[50] as String?
@@ -42,7 +42,7 @@ class VideoTasskAdapter extends TypeAdapter<VideoTassk> {
   }
 
   @override
-  void write(BinaryWriter writer, VideoTassk obj) {
+  void write(BinaryWriter writer, VideoTask obj) {
     writer
       ..writeByte(21)
       ..writeByte(0)
@@ -95,7 +95,7 @@ class VideoTasskAdapter extends TypeAdapter<VideoTassk> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is VideoTasskAdapter &&
+      other is VideoTaskAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

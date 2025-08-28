@@ -21,8 +21,8 @@ class VideoTaskSegment {
 }
 
 @HiveType(typeId: 2)
-class VideoTassk {
-  VideoTassk({
+class VideoTask {
+  VideoTask({
     required this.id,
     required this.shareLink,
     required this.userId,
