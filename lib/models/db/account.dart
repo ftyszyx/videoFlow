@@ -16,32 +16,32 @@ class Account {
   @HiveField(0)
   String? id;
 
-  @HiveField(1)
+  @HiveField(10)
   String? name;
 
-  @HiveField(2)
+  @HiveField(20)
   Map<String, String>? kuaishouCookie;
 
-  @HiveField(3)
+  @HiveField(30)
   String? kuaishouUserName;
 
-  @HiveField(4)
+  @HiveField(40)
   String? kuaishouUserId;
 
   //expire time
-  @HiveField(5)
+  @HiveField(50)
   int? kuaishouExpireTime;
 
-  @HiveField(6)
+  @HiveField(60)
   Map<String, String>? xiaoDianCookie;
 
-  @HiveField(7)
+  @HiveField(70)
   String? xiaoDianUserName;
 
-  @HiveField(8)
+  @HiveField(80)
   String? xiaoDianUserId;
 
-  @HiveField(9)
+  @HiveField(90)
   int? xiaoDianExpireTime;
 
   Map<String, dynamic> toJson() => {

@@ -18,16 +18,16 @@ class AccountAdapter extends TypeAdapter<Account> {
     };
     return Account(
       id: fields[0] as String?,
-      name: fields[1] as String?,
-      kuaishouCookie: (fields[2] as Map?)?.cast<String, String>(),
-      kuaishouUserName: fields[3] as String?,
-      kuaishouUserId: fields[4] as String?,
+      name: fields[10] as String?,
+      kuaishouCookie: (fields[20] as Map?)?.cast<String, String>(),
+      kuaishouUserName: fields[30] as String?,
+      kuaishouUserId: fields[40] as String?,
     )
-      ..kuaishouExpireTime = fields[5] as int?
-      ..xiaoDianCookie = (fields[6] as Map?)?.cast<String, String>()
-      ..xiaoDianUserName = fields[7] as String?
-      ..xiaoDianUserId = fields[8] as String?
-      ..xiaoDianExpireTime = fields[9] as int?;
+      ..kuaishouExpireTime = fields[50] as int?
+      ..xiaoDianCookie = (fields[60] as Map?)?.cast<String, String>()
+      ..xiaoDianUserName = fields[70] as String?
+      ..xiaoDianUserId = fields[80] as String?
+      ..xiaoDianExpireTime = fields[90] as int?;
   }
 
   @override
@@ -36,23 +36,23 @@ class AccountAdapter extends TypeAdapter<Account> {
       ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
-      ..writeByte(1)
+      ..writeByte(10)
       ..write(obj.name)
-      ..writeByte(2)
+      ..writeByte(20)
       ..write(obj.kuaishouCookie)
-      ..writeByte(3)
+      ..writeByte(30)
       ..write(obj.kuaishouUserName)
-      ..writeByte(4)
+      ..writeByte(40)
       ..write(obj.kuaishouUserId)
-      ..writeByte(5)
+      ..writeByte(50)
       ..write(obj.kuaishouExpireTime)
-      ..writeByte(6)
+      ..writeByte(60)
       ..write(obj.xiaoDianCookie)
-      ..writeByte(7)
+      ..writeByte(70)
       ..write(obj.xiaoDianUserName)
-      ..writeByte(8)
+      ..writeByte(80)
       ..write(obj.xiaoDianUserId)
-      ..writeByte(9)
+      ..writeByte(90)
       ..write(obj.xiaoDianExpireTime);
   }
 

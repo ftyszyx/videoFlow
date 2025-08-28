@@ -32,65 +32,74 @@ class VideoTassk {
   @HiveField(0)
   String id;
   //任务名
-  @HiveField(1)
+  @HiveField(10)
   String name;
   //对应的账号id
-  @HiveField(2)
+  @HiveField(20)
   String userId;
 
   //视频封面
-  @HiveField(3)
+  @HiveField(30)
   String? coverPath;
 
   //视频标题
-  @HiveField(4)
+  @HiveField(40)
   String? videoTitle;
 
   //视频副标题
-  @HiveField(5)
+  @HiveField(50)
   String? subTitle;
 
   //视频平台
-  @HiveField(6)
+  @HiveField(60)
   VideoPlatform? videoPlatform;
 
   //下载文件类型
-  @HiveField(7)
+  @HiveField(70)
   DownloadFileType? downloadFileType;
 
   //下载链接
-  @HiveField(8)
+  @HiveField(80)
   String? downloadUrl;
 
   //下载路径
-  @HiveField(9)
+  @HiveField(90)
   String? downloadPath;
 
   //分享链接
-  @HiveField(10)
+  @HiveField(100)
   String shareLink;
 
   //任务状态
-  @HiveField(11)
+  @HiveField(110)
   TaskStatus? status;
 
-  @HiveField(12)
+  @HiveField(120)
   int? downloadFileTotalSize;
 
-  @HiveField(14)
+  @HiveField(140)
   List<VideoTaskSegment>? downloadSegments;
 
-  @HiveField(16)
+  @HiveField(160)
   String? srcVideoTitle;
 
-  @HiveField(17)
+  @HiveField(170)
   String? srcVideoId;
 
-  @HiveField(18)
+  @HiveField(180)
   String? srcVideoCoverUrl;
 
-  @HiveField(19)
+  @HiveField(190)
   int? srcVideoDuration;
+
+  @HiveField(200)
+  String errMsg = '';
+
+  @HiveField(210)
+  String taskLog = '';
+
+  @HiveField(220)
+  TaskStatus? pausedFromStatus;
 
   toJson() => {
     'id': id,
@@ -107,5 +116,21 @@ class VideoTassk {
   @override
   String toString() {
     return jsonEncode(toJson());
+  }
+
+  bool isPaused() {
+    return status == TaskStatus.pause;
+  }
+
+  void pause() {
+    pausedFromStatus = status;
+    status = TaskStatus.pause;
+  }
+
+  bool canDownload() {
+    if (status == null) {
+      return false;
+    }
+    return status!.code >= TaskStatus.parseCompleted.code;
   }
 }

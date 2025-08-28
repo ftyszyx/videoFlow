@@ -11,20 +11,24 @@ enum VideoPlatform {
 
 enum TaskStatus {
   init('初始化', 0),
-  parseUrl('解析链接', 1),
-  parsePause('解析暂停', 2),
-  parseFailed('解析失败', 3),
-  parseCompleted('解析完成', 4),
-  downloading('下载中', 5),
-  downloadFailed('下载失败', 6),
-  downloadPaused('下载暂停', 7),
-  downloadMerge('下载合并', 8),
-  downloadCompleted('下载完成', 9),
-  videoMerge('视频合并', 10),
-  videoMergeFailed('视频合并失败', 11),
-  videoMergePaused('视频合并暂停', 12),
-  videoMergeCompleted('视频合并完成', 13),
-  addCover('添加封面', 14);
+  //解析
+  waitForParse('等待解析', 11),
+  parseing('解析中', 12),
+  parseFailed('解析失败', 13),
+  parseCompleted('解析完成', 14),
+  //下载
+  waitForDownload('等待下载', 21),
+  downloading('下载中', 22),
+  downloadFailed('下载失败', 23),
+  downloadMerge('下载合并', 24),
+  downloadCompleted('下载完成', 25),
+  //视频处理
+  videoMerge('视频合并', 31),
+  videoMergeFailed('视频合并失败', 32),
+  videoMergeCompleted('视频合并完成', 33),
+  addCover('添加封面', 34),
+  //暂停
+  pause('暂停', 41);
 
   final String title;
   final int code;

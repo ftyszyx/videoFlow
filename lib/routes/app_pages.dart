@@ -18,22 +18,37 @@ class MenuItem {
   final int index;
   final IconData icon;
   final String routeName;
-  MenuItem({required this.title, required this.index, required this.icon, required this.routeName});
+  MenuItem({
+    required this.title,
+    required this.index,
+    required this.icon,
+    required this.routeName,
+  });
 }
 
 class AppPages {
   AppPages._();
   static final Map<String, MenuItem> menuItems = {
-    RoutePath.account: MenuItem(title: 'Account', index: 0, icon: Icons.person, routeName: RoutePath.account),
-    RoutePath.task: MenuItem(title: 'Task', index: 1, icon: Icons.task, routeName: RoutePath.task),
+    RoutePath.account: MenuItem(
+      title: '账号',
+      index: 0,
+      icon: Icons.person,
+      routeName: RoutePath.account,
+    ),
+    RoutePath.task: MenuItem(
+      title: '任务',
+      index: 1,
+      icon: Icons.task,
+      routeName: RoutePath.task,
+    ),
     RoutePath.settings: MenuItem(
-      title: 'Settings',
+      title: '设置',
       index: 2,
       icon: Icons.settings,
       routeName: RoutePath.settings,
     ),
     RoutePath.hiveDebug: MenuItem(
-      title: 'Hive Debug',
+      title: '调试',
       index: 3,
       icon: Icons.bug_report,
       routeName: RoutePath.hiveDebug,

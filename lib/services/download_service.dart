@@ -16,25 +16,35 @@ class DownloadManagerService extends GetxService {
   Process? _ffmpegProcess;
   init() {
     _downloadTasks.clear();
+    startDownLoadLoop();
   }
 
-  Future<void> startDownloadTask(VideoTassk taskinfo) async {
-    late VideoTassk task;
-    if (_downloadTasks.containsKey(taskinfo.id)) {
-      task = _downloadTasks[taskinfo.id]!;
-      var status = task.status;
-      if (status == TaskStatus.downloading) {
-        logger.w('Task ${taskinfo.id} is already running.');
-        return;
-      }
-      if (status == TaskStatus.downloadCompleted) {
-        logger.w('Task ${taskinfo.id} is already completed.');
-        return;
+  bool addDownloadTask(VideoTassk task) {
+    if (task.canDownload()) {
+      if (!_downloadTasks.containsKey(task.id)) {
+        _downloadTasks[task.id] = task;
+        logger.i('Task ${task.id} added to download tasks.');
+        return true;
       }
     } else {
-      _downloadTasks[taskinfo.id] = taskinfo;
-      logger.i('Task ${taskinfo.id} starting ');
+      logger.w('Task ${task.id} cannot download. status: ${task.status}');
     }
+    return false;
+  }
+
+  Future<void> startDownLoadLoop() async {
+    while (true) {
+      for (var task in _downloadTasks.values) {
+        if (task.status == TaskStatus.waitForDownload) {
+          task.status = TaskStatus.downloading;
+          await _startDownloadTask(task);
+        }
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
+  }
+
+  Future<void> _startDownloadTask(VideoTassk taskinfo) async {
     if (taskinfo.downloadFileType == DownloadFileType.mp4) {
       await _downloadFile(taskinfo);
     } else if (taskinfo.downloadFileType == DownloadFileType.m3u8) {
@@ -319,7 +329,7 @@ class DownloadManagerService extends GetxService {
 
   void stopDownload(String taskId) {
     if (_downloadTasks.containsKey(taskId)) {
-      _downloadTasks[taskId]!.status = TaskStatus.downloadPaused;
+      _downloadTasks[taskId]!.status = TaskStatus.pause;
       logger.i('Sending cancellation signal to task $taskId.');
       _ffmpegProcess?.kill();
       _ffmpegProcess = null;

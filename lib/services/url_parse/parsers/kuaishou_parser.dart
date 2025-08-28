@@ -1,44 +1,38 @@
 import 'dart:convert';
 
 import 'package:puppeteer/puppeteer.dart';
-import 'package:videoflow/entity/error.dart';
 import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
 import 'package:videoflow/entity/url_parse.dart';
 import 'package:videoflow/entity/common.dart';
+import 'package:videoflow/models/db/video_task.dart';
 
 class KuaishouParser {
-  static Future<CommonResult<LiveDetail>> parse({
-    required String shareText,
-    required String userId,
-    required Function needStop,
-  }) async {
-    final shortUrl = _extractShortUrl(shareText);
+  static Future<void> parse(VideoTassk task) async {
+    final shortUrl = _extractShortUrl(task.shareLink);
     if (shortUrl == null) {
-      return CommonResult(success: false, error: '在分享文本中找不到有效的快手短链接');
+      task.errMsg = '在分享文本中找不到有效的快手短链接';
+      task.status = TaskStatus.parseFailed;
+      return;
     }
     logger.i('提取到短链接: $shortUrl');
-    final result = await _getRedirectUrl(
-      shortUrl: shortUrl,
-      userId: userId,
-      needStop: needStop,
-    );
-    if (!result.success) {
-      return result;
+    await _getRedirectUrl(task: task);
+    if (task.status == TaskStatus.parseFailed || task.isPaused()) {
+      return;
     }
-    final liveDetail = result.data!;
-    liveDetail.platform = VideoPlatform.kuaishou;
-    liveDetail.fileType = DownloadFileType.mp4;
-    if (liveDetail.replayUrl.isNotEmpty) {
-      final uri = Uri.parse(liveDetail.replayUrl);
-      liveDetail.replayUrl = '${uri.scheme}://${uri.host}${uri.path}';
+    task.videoPlatform = VideoPlatform.kuaishou;
+    task.downloadFileType = DownloadFileType.mp4;
+    if (task.downloadUrl != null) {
+      final uri = Uri.parse(task.downloadUrl!);
+      task.downloadUrl = '${uri.scheme}://${uri.host}${uri.path}';
     }
-    if (liveDetail.coverUrl.isNotEmpty) {
-      final uri = Uri.parse(liveDetail.coverUrl);
-      liveDetail.coverUrl = '${uri.scheme}://${uri.host}${uri.path}';
+    if (task.srcVideoCoverUrl != null) {
+      final uri = Uri.parse(task.srcVideoCoverUrl!);
+      task.srcVideoCoverUrl = '${uri.scheme}://${uri.host}${uri.path}';
     }
-    return CommonResult(success: true, data: liveDetail);
+    task.status = TaskStatus.parseCompleted;
+    return;
   }
 
   static String? _extractShortUrl(String text) {
@@ -47,38 +41,35 @@ class KuaishouParser {
     return match?.group(0);
   }
 
-  static Future<CommonResult<LiveDetail>> _getRedirectUrl({
-    required String shortUrl,
-    required String userId,
-    required Function needStop,
-  }) async {
+  static Future<void> _getRedirectUrl({required VideoTassk task}) async {
     Browser? browser;
     Page? page;
     Map<String, LiveDetail> responseLiveDetails = {};
-    LiveDetail liveDetail = LiveDetail();
+    LiveDetail? getLiveDetail;
     try {
       logger.i('正在启动本地浏览器以解析链接 ...');
-      if (needStop()) {
-        return CommonResult(success: false, error: '暂停');
-      }
-      var userinfo = AccountService.instance.getUser(userId);
+      var userinfo = AccountService.instance.getUser(task.userId);
       if (userinfo == null) {
-        return CommonResult(success: false, error: '用户信息未找到');
+        task.errMsg = '用户信息未找到';
+        task.status = TaskStatus.parseFailed;
+        return;
       }
       var kuaishouCookies = userinfo.kuaishouCookie;
       if (kuaishouCookies == null) {
-        return CommonResult(success: false, error: '用户快手cookie未找到');
+        task.errMsg = '用户快手cookie未找到';
+        task.status = TaskStatus.parseFailed;
+        return;
       }
       (browser, page, _) = await CommonUtils.runBrowser(
-        url: shortUrl,
+        url: task.shareLink,
         cookies: kuaishouCookies,
         forceShowBrowser: false,
         onRequest: (request) {
           if (request.url.contains('.mp4')) {
             final videoUrl = Uri.parse(request.url);
             final videoUrlId = videoUrl.queryParameters['clientCacheKey'] ?? '';
-            if (liveDetail.liveId.isNotEmpty &&
-                videoUrlId.startsWith(liveDetail.liveId)) {
+            if (task.srcVideoId != null &&
+                videoUrlId.startsWith(task.srcVideoId!)) {
               logger.i('捕获到视频流链接 from request: ${request.url}');
               return;
             }
@@ -94,35 +85,37 @@ class KuaishouParser {
             if (responseLiveDetails.containsKey(responseVideoId)) {
               return;
             } else {
-              final responseItem = LiveDetail();
-              responseItem.liveId = responseVideoId;
-              responseItem.replayUrl = feedinfo['mainMvUrls'][0]['url'];
-              responseItem.coverUrl = feedinfo['coverUrls'][0]['url'];
-              responseItem.title = feedinfo['caption'];
-              responseItem.duration = feedinfo['duration'] ~/ 1000;
-              responseLiveDetails[responseVideoId] = responseItem;
-              logger.i('捕获到视频流链接  from response: $responseItem ');
+              var liveDetail = LiveDetail();
+              liveDetail.liveId = responseVideoId;
+              liveDetail.replayUrl = feedinfo['mainMvUrls'][0]['url'];
+              liveDetail.coverUrl = feedinfo['coverUrls'][0]['url'];
+              liveDetail.title = feedinfo['caption'];
+              liveDetail.duration = feedinfo['duration'] ~/ 1000;
+              responseLiveDetails[responseVideoId] = liveDetail;
+              logger.i('捕获到视频流链接  from response: $liveDetail ');
             }
           }
         },
       );
-      if (needStop()) {
-        return CommonResult(success: false, error: '暂停');
+      if (task.isPaused()) {
+        return;
       }
       final finalUrl = page.url!;
       logger.i('redirect url: $finalUrl');
       final uri = Uri.parse(finalUrl);
       String? photoId = uri.queryParameters['photoId'];
       if (photoId == null) {
-        return CommonResult(success: false, error: '在分享文本中找不到有效的快手短链接');
+        task.errMsg = '在分享文本中找不到有效的快手短链接';
+        task.status = TaskStatus.parseFailed;
+        return;
       }
       final videoid = photoId;
       logger.i('视频id: $videoid');
-      liveDetail.liveId = videoid;
+      task.srcVideoId = videoid;
       if (responseLiveDetails.containsKey(videoid)) {
-        liveDetail = responseLiveDetails[videoid]!;
-        logger.i('使用responseLiveDetails中的数据: $liveDetail');
-        return CommonResult(success: true, data: liveDetail);
+        getLiveDetail = responseLiveDetails[videoid]!;
+        logger.i('使用responseLiveDetails中的数据: ${task.srcVideoTitle}');
+        return;
       }
       try {
         logger.i('get buttonElement');
@@ -133,8 +126,10 @@ class KuaishouParser {
         );
         if (buttonText == '马上登录') {
           logger.i('clear cookies');
-          await AccountService.instance.updateKuaishouCookie(userId, null);
-          return CommonResult(success: false, error: '用户未登录');
+          await AccountService.instance.updateKuaishouCookie(task.userId, null);
+          task.errMsg = '用户未登录';
+          task.status = TaskStatus.parseFailed;
+          return;
         }
       } catch (e) {
         logger.w('get buttonElement failed, maybe not need login', error: e);
@@ -142,12 +137,16 @@ class KuaishouParser {
 
       //keep waiting
       var retryCount = 0;
-      while (liveDetail.replayUrl.isEmpty) {
+      while (task.downloadUrl == null) {
         if (retryCount > 20) {
-          return CommonResult(success: false, error: '重试次数过多');
+          task.errMsg = '重试次数过多';
+          task.status = TaskStatus.parseFailed;
+          return;
         }
-        if (needStop()) {
-          return CommonResult(success: false, error: '暂停');
+        if (task.isPaused()) {
+          task.errMsg = '暂停';
+          task.status = TaskStatus.parseFailed;
+          return;
         }
         final videokey = 'VisionVideoDetailPhoto:$videoid';
         final videoState = await page.evaluate('window.__APOLLO_STATE__');
@@ -162,18 +161,19 @@ class KuaishouParser {
               final title = data['caption'];
               final duration = data['duration'];
               logger.i('视频已加载完成:  $coverurl $videoUrl $title $duration');
-              liveDetail.replayUrl = videoUrl;
-              liveDetail.coverUrl = coverurl;
-              liveDetail.title = title;
-              liveDetail.duration = duration ~/ 1000;
-              liveDetail.liveId = videoid;
+              getLiveDetail = LiveDetail();
+              getLiveDetail.replayUrl = videoUrl;
+              getLiveDetail.coverUrl = coverurl;
+              getLiveDetail.title = title;
+              getLiveDetail.duration = duration ~/ 1000;
+              getLiveDetail.liveId = videoid;
             }
           }
         }
         if (responseLiveDetails.containsKey(videoid)) {
-          liveDetail = responseLiveDetails[videoid]!;
-          logger.i('使用responseLiveDetails中的数据 inwhile: $liveDetail');
-          return CommonResult(success: true, data: liveDetail);
+          getLiveDetail = responseLiveDetails[videoid]!;
+          logger.i('使用responseLiveDetails中的数据 inwhile: ${task.srcVideoTitle}');
+          return;
         }
         await Future.delayed(const Duration(seconds: 1));
         retryCount++;
@@ -184,7 +184,16 @@ class KuaishouParser {
     } finally {
       logger.i('关闭浏览器');
       await browser?.close();
+      if (getLiveDetail != null) {
+        task.srcVideoTitle = getLiveDetail.title;
+        task.srcVideoCoverUrl = getLiveDetail.coverUrl;
+        task.srcVideoDuration = getLiveDetail.duration;
+        task.srcVideoId = getLiveDetail.liveId;
+        task.downloadUrl = getLiveDetail.replayUrl;
+      }
     }
-    return CommonResult(success: false, error: '未知错误');
+    task.errMsg = '未知错误';
+    task.status = TaskStatus.parseFailed;
+    return;
   }
 }

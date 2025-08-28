@@ -1,51 +1,74 @@
 import 'package:videoflow/models/db/video_task.dart';
 import 'package:videoflow/utils/logger.dart';
 import 'parsers/kuaishou_parser.dart';
-import 'package:videoflow/entity/url_parse.dart';
-import 'package:videoflow/entity/error.dart';
+import 'package:videoflow/entity/common.dart';
 
 import 'package:get/get.dart';
 
 class UrlParseService extends GetxService {
-  var isParsing = false.obs;
   static UrlParseService get instance => Get.find<UrlParseService>();
-  init() {
-    isParsing.value = false;
+  final RxMap<String, VideoTassk> _parseTasks = <String, VideoTassk>{}.obs;
+
+  Future<void> init() async {
+    startParseLoop();
   }
 
-  void stopParsing() {
-    isParsing.value = false;
+  bool addParseTask(VideoTassk task) {
+    if (!_parseTasks.containsKey(task.id)) {
+      _parseTasks[task.id] = task;
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> startParseLoop() async {
+    while (true) {
+      for (var task in _parseTasks.values) {
+        if (task.status == TaskStatus.waitForParse) {
+          _startParseUrl(task);
+        }
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
   }
 
   /// Parses a share text/URL to extract video details like title and m3u8 URL.
-  Future<CommonResult<void>> parseUrl(VideoTassk task) async {
-    if (isParsing.value) {
-      return CommonResult(success: false, error: '正在解析中，请稍后再试');
-    }
-    isParsing.value = true;
-    needStop() {
-      if (!isParsing.value) {
-        return true;
-      }
-      return false;
-    }
+  Future<void> _startParseUrl(VideoTassk task) async {
     try {
-      if (shareText.contains('m.tb.cn')) {
-        return CommonResult(success: false, error: '不支持的平台');
-      } else if (shareText.contains('v.kuaishou.com')) {
-        return await KuaishouParser.parse(
-          userId: userId,
-          shareText: shareText,
-          needStop: needStop,
-        );
+      if (task.shareLink.contains('m.tb.cn')) {
+        task.errMsg = '不支持的平台';
+        task.status = TaskStatus.parseFailed;
+        return;
+      } else if (task.shareLink.contains('v.kuaishou.com')) {
+        await KuaishouParser.parse(task);
       } else {
-        return CommonResult(success: false, error: '不支持的平台');
+        task.errMsg = '不支持的平台';
+        task.status = TaskStatus.parseFailed;
+        return;
       }
     } catch (e, s) {
       logger.e('Failed to parse url', error: e, stackTrace: s);
-      return CommonResult(success: false, error: '解析失败');
-    } finally {
-      isParsing.value = false;
+      task.errMsg = '解析失败';
+      task.status = TaskStatus.parseFailed;
+      return;
     }
+  }
+
+  void stopParse(String taskId) {
+    if (_parseTasks.containsKey(taskId)) {
+      _parseTasks[taskId]!.status = TaskStatus.pause;
+      _parseTasks.remove(taskId);
+    }
+  }
+
+  void stopAllParse() {
+    for (var task in _parseTasks.values) {
+      stopParse(task.id);
+    }
+  }
+
+  void dispose() {
+    stopAllParse();
+    _parseTasks.clear();
   }
 }

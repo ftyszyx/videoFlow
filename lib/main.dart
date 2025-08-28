@@ -9,6 +9,7 @@ import 'package:videoflow/models/db/video_task.dart';
 import 'package:videoflow/modules/log/debug_log_page.dart';
 import 'package:videoflow/routes/app_pages.dart';
 import 'package:videoflow/services/account_service.dart';
+import 'package:videoflow/services/download_service.dart';
 import 'package:videoflow/services/url_parse/url_parse_service.dart';
 import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/services/app_config_service.dart';
@@ -27,9 +28,7 @@ void main() async {
   await initWindow();
   var appDocsDir = await getApplicationSupportDirectory();
   await Hive.initFlutter(
-    (!Platform.isAndroid && !Platform.isIOS)
-        ? appDocsDir.path
-        : null,
+    (!Platform.isAndroid && !Platform.isIOS) ? appDocsDir.path : null,
   );
   await initServices();
   runApp(const MyApp());
@@ -58,6 +57,7 @@ Future initServices() async {
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
   await Get.put(UrlParseService()).init();
+  await Get.put(DownloadManagerService()).init();
   await logger.initialize();
 }
 
@@ -101,8 +101,8 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale("zh", "CN")],
           logWriterCallback: (text, {bool? isError}) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (isError ?? false) {
-              logger.e(text);
+              if (isError ?? false) {
+                logger.e(text);
               } else {
                 logger.i(text);
               }
