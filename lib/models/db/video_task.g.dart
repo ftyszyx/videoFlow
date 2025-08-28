@@ -17,14 +17,14 @@ class VideoTaskAdapter extends TypeAdapter<VideoTask> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return VideoTask(
-        id: fields[0] as String,
-        shareLink: fields[100] as String,
-        userId: fields[20] as String,
-        name: fields[10] as String,
-      )
-      ..coverPath = fields[30] as String?
-      ..videoTitle = fields[40] as String?
-      ..subTitle = fields[50] as String?
+      id: fields[0] as String,
+      shareLink: fields[100] as String,
+      userId: fields[20] as String,
+      coverPath: fields[30] as String,
+      videoTitle: fields[40] as String,
+      subTitle: fields[50] as String,
+      name: fields[10] as String,
+    )
       ..videoPlatform = fields[60] as VideoPlatform?
       ..downloadFileType = fields[70] as DownloadFileType?
       ..downloadUrl = fields[80] as String?

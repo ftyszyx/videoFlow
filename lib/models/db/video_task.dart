@@ -26,6 +26,9 @@ class VideoTask {
     required this.id,
     required this.shareLink,
     required this.userId,
+    required this.coverPath,
+    required this.videoTitle,
+    required this.subTitle,
     this.name = '',
   });
   //自动生成
@@ -40,15 +43,15 @@ class VideoTask {
 
   //视频封面
   @HiveField(30)
-  String? coverPath;
+  String coverPath;
 
   //视频标题
   @HiveField(40)
-  String? videoTitle;
+  String videoTitle;
 
   //视频副标题
   @HiveField(50)
-  String? subTitle;
+  String subTitle;
 
   //视频平台
   @HiveField(60)

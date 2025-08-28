@@ -10,6 +10,7 @@ import 'package:videoflow/modules/log/debug_log_page.dart';
 import 'package:videoflow/routes/app_pages.dart';
 import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/services/download_service.dart';
+import 'package:videoflow/services/task_servcie.dart';
 import 'package:videoflow/services/url_parse/url_parse_service.dart';
 import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/services/app_config_service.dart';
@@ -57,6 +58,7 @@ Future initServices() async {
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
   await Get.put(UrlParseService()).init();
+  await Get.put(TaskService()).init();
   await Get.put(DownloadManagerService()).init();
   await logger.initialize();
 }
