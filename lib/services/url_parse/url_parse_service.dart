@@ -32,7 +32,6 @@ class UrlParseService extends GetxService {
     }
   }
 
-  /// Parses a share text/URL to extract video details like title and m3u8 URL.
   Future<void> _startParseUrl(VideoTask task) async {
     try {
       if (task.shareLink.contains('m.tb.cn')) {
