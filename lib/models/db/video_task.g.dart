@@ -38,13 +38,14 @@ class VideoTaskAdapter extends TypeAdapter<VideoTask> {
       ..srcVideoDuration = fields[190] as int?
       ..errMsg = fields[200] as String
       ..taskLog = fields[210] as String
-      ..pausedFromStatus = fields[220] as TaskStatus?;
+      ..pausedFromStatus = fields[220] as TaskStatus?
+      ..coverStyleId = fields[230] as String?;
   }
 
   @override
   void write(BinaryWriter writer, VideoTask obj) {
     writer
-      ..writeByte(21)
+      ..writeByte(22)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(10)
@@ -86,7 +87,9 @@ class VideoTaskAdapter extends TypeAdapter<VideoTask> {
       ..writeByte(210)
       ..write(obj.taskLog)
       ..writeByte(220)
-      ..write(obj.pausedFromStatus);
+      ..write(obj.pausedFromStatus)
+      ..writeByte(230)
+      ..write(obj.coverStyleId);
   }
 
   @override

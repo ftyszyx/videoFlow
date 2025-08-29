@@ -107,6 +107,28 @@ class TaskPage extends GetView<TaskControl> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
+                      Expanded(
+                        child: Obx(
+                          () => DropdownButton<String>(
+                            value:
+                                controller.selectedCoverStyleId.value.isNotEmpty
+                                ? controller.selectedCoverStyleId.value
+                                : null,
+                            hint: const Text('选择封面样式'),
+                            items: controller.coverStyles
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s.id,
+                                    child: Text(s.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) =>
+                                controller.selectedCoverStyleId.value = v ?? '',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Obx(() {
                         final path = controller.coverPath;
                         return Text(

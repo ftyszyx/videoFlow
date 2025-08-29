@@ -16,6 +16,8 @@ import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/services/app_config_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
+import 'package:videoflow/models/db/cover_style.dart';
+import 'package:videoflow/services/cover_style_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -54,10 +56,12 @@ Future initWindow() async {
 Future initServices() async {
   Hive.registerAdapter(AccountAdapter());
   Hive.registerAdapter(VideoTaskAdapter());
+  Hive.registerAdapter(CoverStyleAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
   await Get.put(UrlParseService()).init();
+  await Get.put(CoverStyleService()).init();
   await Get.put(TaskService()).init();
   await Get.put(DownloadManagerService()).init();
   await logger.initialize();

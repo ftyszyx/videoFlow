@@ -50,6 +50,23 @@ windows桌面程序
     1. 新建任务
     1. 运行任务
 
+GitHub: https://github.com/hm21/pro_image_editor
+https://pub.dev/packages/flutter_painter_v2
+1. 封面设计
+https://www.gaoding.com/editor/design?mode=user&category_id=370&type=poster&width=1242&height=2208&unit=px&dpi=72&id=33610099700772948
+1.全屏页面
+1.分四列
+    第一列是工具箱：文字，图片，背景
+    第二列是，预选page
+        点文字，显示几种大小的文字给用户选择，点击后，在封面中添加文字
+        选图片，弹出图片选择框，选择后添加对应图片在封面中
+        选背景，会展示几个默认的背景，选择后会修改封面中的背景
+    第三列是封面效果预览，展示当前的封面效果
+        同时用户可以选择封面中的元素，被选择的元素需要有选中效果
+        同时如果元素是文字或者图片，可以拖去元素，旋转元素等
+    第四列是元素属性
+        当用户选择了封面中某个元素，可以在此修改元素的属性
+
 任务流程：
 1.根据分享url,获取视频真实地址，
 2.下载视频

@@ -104,6 +104,10 @@ class VideoTask {
   @HiveField(220)
   TaskStatus? pausedFromStatus;
 
+  // 选中的封面样式ID
+  @HiveField(230)
+  String? coverStyleId;
+
   toJson() => {
     'id': id,
     'name': name,

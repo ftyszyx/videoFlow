@@ -10,6 +10,8 @@ import 'package:videoflow/services/task_servcie.dart';
 import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/services/url_parse/url_parse_service.dart';
 import 'package:videoflow/services/download_service.dart';
+import 'package:videoflow/services/cover_style_service.dart';
+import 'package:videoflow/models/db/cover_style.dart';
 
 class TaskControl extends GetxController {
   // Form controllers
@@ -26,6 +28,8 @@ class TaskControl extends GetxController {
 
   // Task list
   final RxList<VideoTask> tasks = <VideoTask>[].obs;
+  final RxList<CoverStyle> coverStyles = <CoverStyle>[].obs;
+  final RxString selectedCoverStyleId = ''.obs;
 
   TaskService get _taskService => TaskService.instance;
   AccountService get _accountService => AccountService.instance;
@@ -38,6 +42,7 @@ class TaskControl extends GetxController {
     super.onInit();
     _refreshAccounts();
     _refreshTasks();
+    _refreshCoverStyles();
     // listen changes from task service (put/update/delete called within app)
     _taskService.changed.listen((_) => _refreshTasks());
   }
@@ -82,6 +87,9 @@ class TaskControl extends GetxController {
       subTitle: subtitle,
       name: title.isNotEmpty ? title : '任务',
     )..status = TaskStatus.init;
+    task.coverStyleId = selectedCoverStyleId.value.isNotEmpty
+        ? selectedCoverStyleId.value
+        : null;
 
     await _taskService.put(task);
     _clearForm();
@@ -122,6 +130,13 @@ class TaskControl extends GetxController {
 
   void _refreshTasks() {
     tasks.assignAll(_taskService.getAll());
+  }
+
+  void _refreshCoverStyles() {
+    coverStyles.assignAll(CoverStyleService.instance.getAll());
+    if (coverStyles.isNotEmpty && selectedCoverStyleId.value.isEmpty) {
+      selectedCoverStyleId.value = coverStyles.first.id;
+    }
   }
 
   void _clearForm() {

@@ -4,6 +4,7 @@ import 'package:videoflow/modules/account/account_control.dart';
 import 'package:videoflow/modules/account/account_page.dart';
 import 'package:videoflow/modules/account/qr_login/auth/kwai.dart';
 import 'package:videoflow/modules/account/qr_login/auth/kwai_shop.dart';
+import 'package:videoflow/modules/cover_style/cover_style_control.dart';
 import 'package:videoflow/modules/indexed/indexed_control.dart';
 import 'package:videoflow/modules/indexed/indexed_page.dart';
 import 'package:videoflow/modules/task/task_control.dart';
@@ -14,6 +15,7 @@ import 'package:videoflow/utils/route_path.dart';
 import 'package:videoflow/modules/account/qr_login/qr_login_page.dart';
 import 'package:videoflow/modules/account/qr_login/qr_login_control.dart';
 import 'package:videoflow/modules/debug/hive_debug_page.dart';
+import 'package:videoflow/modules/cover_style/cover_style_page.dart';
 
 class MenuItem {
   final String title;
@@ -49,9 +51,15 @@ class AppPages {
       icon: Icons.settings,
       routeName: RoutePath.settings,
     ),
+    RoutePath.coverStyles: MenuItem(
+      title: '样式',
+      index: 3,
+      icon: Icons.style,
+      routeName: RoutePath.coverStyles,
+    ),
     RoutePath.hiveDebug: MenuItem(
       title: '调试',
-      index: 3,
+      index: 4,
       icon: Icons.bug_report,
       routeName: RoutePath.hiveDebug,
     ),
@@ -83,6 +91,13 @@ class AppPages {
       page: () => const SetPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => SetControl());
+      }),
+    ),
+    GetPage(
+      name: RoutePath.coverStyles,
+      page: () => const CoverStylePage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => CoverStyleControl());
       }),
     ),
     GetPage(
