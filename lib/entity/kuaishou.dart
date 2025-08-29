@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 class QrStartData {
   final int? expireTime;
   final String? qrUrl;
@@ -55,23 +56,9 @@ class QrAcceptResultData {
   }
 }
 
-enum KuaishouPlatform {
-  kuaishou,
-  shop;
-}
 
-class KwaiQrVariant {
-  final KuaishouPlatform platform;
-  final String qrHost;
-  final String sid;
-  final Map<String, String> otherParams;
-  const KwaiQrVariant({
-    required this.platform,
-    required this.qrHost,
-    required this.sid,
-    required this.otherParams,
-  });
-}
+
+
 
 const kuaishouQrVariant = KwaiQrVariant(
   platform: KuaishouPlatform.kuaishou,
