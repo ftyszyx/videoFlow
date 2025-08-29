@@ -14,7 +14,11 @@ class KwaiQrSession extends QrAuthSession {
   });
 
   @override
-  Future<void> afterRun(pup.Browser browser, pup.Page page) async {
+  Future<void> afterRun() async {
+    if (browser == null) {
+      return;
+    }
+    final page = browser!.page!;
     try {
       final loginText = await page.evaluate(
         'document.querySelector("p.user-default").innerText',
@@ -31,18 +35,22 @@ class KwaiQrSession extends QrAuthSession {
   }
 
   @override
-  Future<void> onRequest(pup.Request request) async {}
+  Future<void> onRequest(pup.Request request) async {
+    await super.onRequest(request);
+  }
 
   @override
   Future<void> onResponse(pup.Response response) async {
-    if (response.request.url.contains("$host/rest/c/infra/ks/qr/start")) {
+    await super.onResponse(response);
+    final url = response.request.url;
+    logger.i("KwaiQrSession onResponse: $url");
+    if (url.contains("$host/rest/c/infra/ks/qr/start")) {
       final jsonData = jsonDecode(await response.text);
       qrUrl = jsonData['qrUrl'];
       imageData = jsonData['imageData'];
       qrStatus.value = QRStatus.unscanned;
-    } else if (response.request.url.contains(
-      "$host/rest/c/infra/ks/qr/scanResult",
-    )) {
+      logger.i("get qrcode ok");
+    } else if (url.contains("$host/rest/c/infra/ks/qr/scanResult")) {
       final jsonData = jsonDecode(await response.text);
       final resCode = jsonData['result'];
       if (resCode == 1) {
@@ -52,9 +60,7 @@ class KwaiQrSession extends QrAuthSession {
       } else {
         qrStatus.value = QRStatus.failed;
       }
-    } else if (response.request.url.contains(
-      "$host/pass/kuaishou/login/qr/callback",
-    )) {
+    } else if (url.contains("$host/pass/kuaishou/login/qr/callback")) {
       final jsonData = jsonDecode(await response.text);
       final resCode = jsonData['result'];
       if (resCode == 1) {

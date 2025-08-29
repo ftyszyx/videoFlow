@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:videoflow/entity/qr.dart';
-import 'package:videoflow/modules/account/kwai/qr_login_control.dart';
+import 'package:videoflow/modules/account/qr_login/qr_login_control.dart';
 
 class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
   const KuaishouQrLoginPage({super.key});

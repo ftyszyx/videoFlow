@@ -1,5 +1,6 @@
 import 'package:get/get_rx/get_rx.dart';
 import 'package:puppeteer/puppeteer.dart';
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/utils/common.dart';
 
 enum QRStatus { loading, unscanned, scanned, expired, failed, success }
@@ -13,24 +14,28 @@ class QrAuthSession {
   String? qrUrl;
   String? imageData;
   Rx<QRStatus> qrStatus = QRStatus.loading.obs;
-  Browser? _browser;
+  BrowserSession? _browser;
+  BrowserSession? get browser => _browser;
 
-  Future<void> afterRun(Browser browser, Page page) async {}
+  Future<void> afterRun() async {}
 
-  Future<void> onRequest(Request request) async {}
+  Future<void> onRequest(Request request) async {
+    // logger.i('onRequest: ${request.url}');
+  }
 
-  Future<void> onResponse(Response response) async {}
+  Future<void> onResponse(Response response) async {
+    // logger.i('onResponse: ${response.url}');
+  }
 
   Future<void> onStart(String userId) async {
     this.userId = userId;
-    var (browser, page, _) = await CommonUtils.runBrowser(
+    _browser = await CommonUtils.runBrowser(
       url: startUrl,
       forceShowBrowser: false,
       onRequest: onRequest,
       onResponse: onResponse,
     );
-    _browser = browser;
-    await afterRun(browser, page);
+    await afterRun();
   }
 
   void onDestroy() {

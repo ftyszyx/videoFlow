@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:puppeteer/puppeteer.dart';
+
 enum DownloadFileType { m3u8, mp4, unknown }
 
 enum VideoPlatform {
@@ -33,4 +37,18 @@ enum TaskStatus {
   final String title;
   final int code;
   const TaskStatus(this.title, this.code);
+}
+
+class BrowserSession {
+  final Browser? browser;
+  final Page? page;
+  final String? userDataDir;
+  BrowserSession({this.browser, this.page, this.userDataDir});
+
+  Future<void> close() async {
+    await browser?.close();
+    if (userDataDir != null) {
+      await Directory(userDataDir!).delete(recursive: true);
+    }
+  }
 }

@@ -1,6 +1,5 @@
 import 'package:videoflow/entity/qr.dart';
-import 'package:puppeteer/puppeteer.dart' as pup;
-import 'package:videoflow/modules/account/qr/kwai.dart';
+import 'package:videoflow/modules/account/qr_login/auth/kwai.dart';
 
 class KwaiShopQrSession extends KwaiQrSession {
   @override
@@ -12,5 +11,5 @@ class KwaiShopQrSession extends KwaiQrSession {
       );
 
   @override
-  Future<void> afterRun(pup.Browser browser, pup.Page page) async {}
+  Future<void> afterRun() async {}
 }

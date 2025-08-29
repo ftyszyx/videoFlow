@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:videoflow/modules/account/account_control.dart';
 import 'package:videoflow/modules/account/account_page.dart';
-import 'package:videoflow/modules/account/qr/kwai.dart';
-import 'package:videoflow/modules/account/qr/kwai_shop.dart';
+import 'package:videoflow/modules/account/qr_login/auth/kwai.dart';
+import 'package:videoflow/modules/account/qr_login/auth/kwai_shop.dart';
 import 'package:videoflow/modules/indexed/indexed_control.dart';
 import 'package:videoflow/modules/indexed/indexed_page.dart';
 import 'package:videoflow/modules/task/task_control.dart';
@@ -11,8 +11,8 @@ import 'package:videoflow/modules/task/task_page.dart';
 import 'package:videoflow/modules/set/set_control.dart';
 import 'package:videoflow/modules/set/set_page.dart';
 import 'package:videoflow/utils/route_path.dart';
-import 'package:videoflow/modules/account/kwai/qr_login_page.dart';
-import 'package:videoflow/modules/account/kwai/qr_login_control.dart';
+import 'package:videoflow/modules/account/qr_login/qr_login_page.dart';
+import 'package:videoflow/modules/account/qr_login/qr_login_control.dart';
 import 'package:videoflow/modules/debug/hive_debug_page.dart';
 
 class MenuItem {

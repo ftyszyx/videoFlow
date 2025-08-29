@@ -42,8 +42,7 @@ class KuaishouParser {
   }
 
   static Future<void> _getRedirectUrl({required VideoTask task}) async {
-    Browser? browser;
-    Page? page;
+    BrowserSession? browserSession;
     Map<String, LiveDetail> responseLiveDetails = {};
     LiveDetail? getLiveDetail;
     try {
@@ -60,7 +59,7 @@ class KuaishouParser {
         task.status = TaskStatus.parseFailed;
         return;
       }
-      (browser, page, _) = await CommonUtils.runBrowser(
+      browserSession = await CommonUtils.runBrowser(
         url: task.shareLink,
         cookies: kuaishouCookies,
         forceShowBrowser: false,
@@ -100,6 +99,7 @@ class KuaishouParser {
       if (task.isPaused()) {
         return;
       }
+      final page = browserSession.page!;
       final finalUrl = page.url!;
       logger.i('redirect url: $finalUrl');
       final uri = Uri.parse(finalUrl);
@@ -183,7 +183,7 @@ class KuaishouParser {
       rethrow;
     } finally {
       logger.i('关闭浏览器');
-      await browser?.close();
+      await browserSession?.close();
       if (getLiveDetail != null) {
         task.srcVideoTitle = getLiveDetail.title;
         task.srcVideoCoverUrl = getLiveDetail.coverUrl;

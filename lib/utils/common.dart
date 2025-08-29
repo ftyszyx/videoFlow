@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:puppeteer/puppeteer.dart';
 import 'package:path/path.dart' as path;
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/services/app_config_service.dart';
 import 'package:videoflow/utils/logger.dart';
 
@@ -71,7 +73,7 @@ class CommonUtils {
   }
 
   //https://peter.sh/experiments/chromium-command-line-switches/#net-log
-  static Future<(Browser, Page, bool)> runBrowser({
+  static Future<BrowserSession> runBrowser({
     required String url,
     Map<String, String>? cookies,
     bool forceShowBrowser = false,
@@ -80,6 +82,7 @@ class CommonUtils {
   }) async {
     try {
       final String exeDir = path.dirname(Platform.resolvedExecutable);
+      logger.i('exeDir: $exeDir');
       final String chromiumPath = path.join(
         exeDir,
         'data',
@@ -95,18 +98,30 @@ class CommonUtils {
       var args = ['--disable-dev-shm-usage'];
       args.add('--no-sandbox');
       args.add('--disable-setuid-sandbox');
+      args.add('--remote-debugging-port=0');
       if (AppConfigService.instance.isdebug) {
         args.add('--auto-open-devtools-for-tabs');
         args.add('--net-log');
         args.add('--unsafely-disable-devtools-self-xss-warnings'); // pasting
       }
       //options.AddUserProfilePreference("console.log.preserveLog", true);
-      final showBrowser = AppConfigService.instance.isdebug || forceShowBrowser;
+      var showBrowser = AppConfigService.instance.isdebug || forceShowBrowser;
+      logger.i('showBrowser: $showBrowser');
+      if (!showBrowser) {
+        args.add('--headless=new'); // 新 headless，Windows 更稳定
+      }
+      final userDataDir = path.join(
+        AppConfigService.instance.appDataPath,
+        'chrome-profile',
+        DateTime.now().millisecondsSinceEpoch.toString(),
+      );
+      logger.i('userDataDir: $userDataDir');
       var browser = await puppeteer.launch(
         executablePath: chromiumPath,
         headless: !showBrowser,
         ignoreHttpsErrors: true,
         args: args,
+        userDataDir: userDataDir,
       );
       final page = await browser.newPage();
       page.onConsole.listen((event) {
@@ -122,9 +137,7 @@ class CommonUtils {
           onResponse(response);
         }
       });
-      await page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-      );
+      await page.setUserAgent(AppConfigService.instance.userAgent);
       // await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
       if (cookies != null) {
         var cookieList = cookies.entries
@@ -139,7 +152,11 @@ class CommonUtils {
         timeout: const Duration(seconds: 0),
       );
       //set cookies
-      return (browser, page, showBrowser);
+      return BrowserSession(
+        browser: browser,
+        page: page,
+        userDataDir: userDataDir,
+      );
     } catch (e, s) {
       logger.e('启动浏览器失败', error: e, stackTrace: s);
       throw Exception('启动浏览器失败 ');
