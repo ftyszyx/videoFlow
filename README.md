@@ -79,3 +79,8 @@ https://www.gaoding.com/editor/design?mode=user&category_id=370&type=poster&widt
 
 
 
+可选（自动化下载本地化）
+新建目录 packages/，一条命令拉下来：
+git clone https://github.com/hm21/pro_image_editor.git -b stable packages/pro_image_editor
+pubspec.yaml 写：path: packages/pro_image_editor
+这样就完成了本地路径集成，后续在 CoverStyleEditorPage 里直接用 package:pro_image_editor/pro_image_editor.dart 即可。
