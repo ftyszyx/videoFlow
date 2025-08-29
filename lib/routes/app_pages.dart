@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:videoflow/entity/kuaishou.dart';
 import 'package:videoflow/modules/account/account_control.dart';
 import 'package:videoflow/modules/account/account_page.dart';
+import 'package:videoflow/modules/account/qr/kwai.dart';
+import 'package:videoflow/modules/account/qr/kwai_shop.dart';
 import 'package:videoflow/modules/indexed/indexed_control.dart';
 import 'package:videoflow/modules/indexed/indexed_page.dart';
 import 'package:videoflow/modules/task/task_control.dart';
@@ -88,14 +89,14 @@ class AppPages {
       name: RoutePath.kwaiQrLogin,
       page: () => const KuaishouQrLoginPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut(() => KuaiShouQrLoginControl(kuaishouQrVariant));
+        Get.lazyPut(() => KuaiShouQrLoginControl(KwaiQrSession()));
       }),
     ),
     GetPage(
       name: RoutePath.shopQrLogin,
       page: () => const KuaishouQrLoginPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut(() => KuaiShouQrLoginControl(shopQrVariant));
+        Get.lazyPut(() => KuaiShouQrLoginControl(KwaiShopQrSession()));
       }),
     ),
     GetPage(name: RoutePath.hiveDebug, page: () => const HiveDebugPage()),

@@ -70,11 +70,24 @@ class CommonUtils {
     }
   }
 
-//https://peter.sh/experiments/chromium-command-line-switches/#net-log
-  static Future<(Browser, Page,bool)> runBrowser({required String url, Map<String,String>? cookies,bool forceShowBrowser=false, Function(Request)? onRequest, Function(Response)? onResponse}) async {
+  //https://peter.sh/experiments/chromium-command-line-switches/#net-log
+  static Future<(Browser, Page, bool)> runBrowser({
+    required String url,
+    Map<String, String>? cookies,
+    bool forceShowBrowser = false,
+    Function(Request)? onRequest,
+    Function(Response)? onResponse,
+  }) async {
     try {
       final String exeDir = path.dirname(Platform.resolvedExecutable);
-      final String chromiumPath = path.join(exeDir, 'data', 'flutter_assets', 'assets', 'chrome-win', 'chrome.exe');
+      final String chromiumPath = path.join(
+        exeDir,
+        'data',
+        'flutter_assets',
+        'assets',
+        'chrome-win',
+        'chrome.exe',
+      );
       if (!await File(chromiumPath).exists()) {
         throw Exception('打包的 chrome.exe 未找到，路径: $chromiumPath');
       }
@@ -82,13 +95,13 @@ class CommonUtils {
       var args = ['--disable-dev-shm-usage'];
       args.add('--no-sandbox');
       args.add('--disable-setuid-sandbox');
-      if(AppConfigService.instance.isdebug){
+      if (AppConfigService.instance.isdebug) {
         args.add('--auto-open-devtools-for-tabs');
         args.add('--net-log');
-        args.add('--unsafely-disable-devtools-self-xss-warnings');// pasting 
+        args.add('--unsafely-disable-devtools-self-xss-warnings'); // pasting
       }
       //options.AddUserProfilePreference("console.log.preserveLog", true);
-      final showBrowser = AppConfigService.instance.isdebug||forceShowBrowser;
+      final showBrowser = AppConfigService.instance.isdebug || forceShowBrowser;
       var browser = await puppeteer.launch(
         executablePath: chromiumPath,
         headless: !showBrowser,
@@ -109,25 +122,40 @@ class CommonUtils {
           onResponse(response);
         }
       });
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36');
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+      );
       // await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
-      if(cookies!=null){
-        var cookieList=cookies.entries.map((e) => CookieParam(name: e.key, value: e.value)).toList();
+      if (cookies != null) {
+        var cookieList = cookies.entries
+            .map((e) => CookieParam(name: e.key, value: e.value))
+            .toList();
         await page.setCookies(cookieList);
       }
       logger.i('浏览器正在导航到: $url');
-      await page.goto(url, wait: Until.networkIdle,timeout: const Duration(seconds: 0));
+      await page.goto(
+        url,
+        wait: Until.networkIdle,
+        timeout: const Duration(seconds: 0),
+      );
       //set cookies
-      return (browser, page,showBrowser);
-    } catch (e) {
-      logger.e('启动浏览器失败', error: e);
-      throw Exception('启动浏览器失败');
+      return (browser, page, showBrowser);
+    } catch (e, s) {
+      logger.e('启动浏览器失败', error: e, stackTrace: s);
+      throw Exception('启动浏览器失败 ');
     }
   }
 
   static Future<void> playMp4(String videoPath) async {
     final exeDir = path.dirname(Platform.resolvedExecutable);
-    final ffplayPath = path.join(exeDir, 'data', 'flutter_assets', 'assets', 'ffmpeg', 'ffplay.exe');
+    final ffplayPath = path.join(
+      exeDir,
+      'data',
+      'flutter_assets',
+      'assets',
+      'ffmpeg',
+      'ffplay.exe',
+    );
     if (!await File(ffplayPath).exists()) {
       throw Exception('打包的 ffplay.exe 未找到，路径: $ffplayPath');
     }

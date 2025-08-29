@@ -22,11 +22,11 @@ class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
       ),
       body: Center(
         child: Obx(() {
-          switch (controller.qrStatus.value) {
+          switch (controller.session.qrStatus.value) {
             case QRStatus.loading:
               return const CircularProgressIndicator();
             case QRStatus.unscanned:
-              final img = controller.qrStartData.value.imageData;
+              final img = controller.session.imageData;
               if (img == null || img.isEmpty) {
                 return const Text('二维码加载中...');
               }
@@ -63,7 +63,6 @@ class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
                   FilledButton(
                     onPressed: () {
                       controller.loadQrCode();
-                      controller.startPoll();
                     },
                     child: const Text('重新获取'),
                   ),
@@ -78,12 +77,13 @@ class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
                   OutlinedButton(
                     onPressed: () {
                       controller.loadQrCode();
-                      controller.startPoll();
                     },
                     child: const Text('重试'),
                   ),
                 ],
               );
+            case QRStatus.success:
+              return const Text('登录成功');
           }
         }),
       ),
