@@ -8,26 +8,28 @@ class KuaiShouQrLoginControl extends BaseControl {
   String? accountId;
   KuaiShouQrLoginControl(this._session);
 
+  Worker? _statusWorker;
+
   @override
   void onInit() {
     super.onInit();
     accountId = Get.parameters['id'];
+    _statusWorker = ever<QRStatus>(
+      _session.qrStatus,
+      (status) {
+        if (status == QRStatus.success) {
+          if (Get.key.currentState?.canPop() == true) Get.back<void>();
+        }
+      },
+    );
     _session.onStart(accountId!);
   }
 
   @override
   void onClose() {
-    super.onClose();
+    _statusWorker?.dispose();
     _session.onDestroy();
-  }
-
-  String getPlatformTitle() {
-    switch (_session.platform) {
-      case QrPlatform.kwai:
-        return "快手";
-      case QrPlatform.kwaiShop:
-        return "小店";
-    }
+    super.onClose();
   }
 
   void loadQrCode() async {

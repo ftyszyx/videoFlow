@@ -51,12 +51,12 @@ class AppPages {
       icon: Icons.settings,
       routeName: RoutePath.settings,
     ),
-    RoutePath.coverStyles: MenuItem(
-      title: '样式',
-      index: 3,
-      icon: Icons.style,
-      routeName: RoutePath.coverStyles,
-    ),
+    // RoutePath.coverStyles: MenuItem(
+    //   title: '样式',
+    //   index: 3,
+    //   icon: Icons.style,
+    //   routeName: RoutePath.coverStyles,
+    // ),
     RoutePath.hiveDebug: MenuItem(
       title: '调试',
       index: 4,

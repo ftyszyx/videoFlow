@@ -8,7 +8,7 @@ part of 'video_task.dart';
 
 class VideoTaskAdapter extends TypeAdapter<VideoTask> {
   @override
-  final int typeId = 2;
+  final int typeId = 4;
 
   @override
   VideoTask read(BinaryReader reader) {

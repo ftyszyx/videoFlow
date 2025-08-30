@@ -5,7 +5,8 @@ import 'package:puppeteer/puppeteer.dart';
 enum DownloadFileType { m3u8, mp4, unknown }
 
 enum VideoPlatform {
-  kuaishou('快手'),
+  kwai('快手'),
+  kwaiShop('快手小店'),
   taobao('淘宝'),
   unknown('未知');
 
@@ -50,5 +51,19 @@ class BrowserSession {
     if (userDataDir != null) {
       await Directory(userDataDir!).delete(recursive: true);
     }
+  }
+}
+
+
+String getPlatformTitle(VideoPlatform platform) {
+  switch (platform) {
+    case VideoPlatform.kwai:
+      return "快手";
+    case VideoPlatform.kwaiShop:
+      return "快手小店";
+    case VideoPlatform.taobao:
+      return "淘宝";
+    case VideoPlatform.unknown:
+      return "未知";
   }
 }

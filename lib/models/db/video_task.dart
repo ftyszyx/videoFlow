@@ -20,7 +20,7 @@ class VideoTaskSegment {
   });
 }
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 4)
 class VideoTask {
   VideoTask({
     required this.id,

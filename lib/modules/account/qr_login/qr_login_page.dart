@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/entity/qr.dart';
 import 'package:videoflow/modules/account/qr_login/qr_login_control.dart';
 
@@ -10,7 +11,7 @@ class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('扫码登录${controller.getPlatformTitle()}'),
+        title: Text('扫码登录${getPlatformTitle(controller.session.platform)}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -49,7 +50,7 @@ class KuaishouQrLoginPage extends GetView<KuaiShouQrLoginControl> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('请使用${controller.getPlatformTitle()} App 扫码登录'),
+                  Text('请使用${getPlatformTitle(controller.session.platform)} App 扫码登录'),
                 ],
               );
             case QRStatus.scanned:

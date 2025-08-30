@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'cover_style.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 1)
 class CoverStyle {
   CoverStyle({
     required this.id,

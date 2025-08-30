@@ -1,4 +1,4 @@
-import 'package:videoflow/entity/qr.dart';
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/modules/account/qr_login/auth/kwai.dart';
 
 class KwaiShopQrSession extends KwaiQrSession {
@@ -6,7 +6,7 @@ class KwaiShopQrSession extends KwaiQrSession {
   String get host => "https://id.kwaixiaodian.com";
   KwaiShopQrSession()
     : super(
-        platform: QrPlatform.kwaiShop,
+        platform: VideoPlatform.kwaiShop,
         startUrl: "https://login.kwaixiaodian.com/?biz=zone",
       );
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:videoflow/models/db/platform_info.dart';
 import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
@@ -19,7 +20,7 @@ class KuaishouParser {
     if (task.status == TaskStatus.parseFailed || task.isPaused()) {
       return;
     }
-    task.videoPlatform = VideoPlatform.kuaishou;
+    task.videoPlatform = VideoPlatform.kwai;
     task.downloadFileType = DownloadFileType.mp4;
     if (task.downloadUrl != null) {
       final uri = Uri.parse(task.downloadUrl!);
@@ -51,7 +52,13 @@ class KuaishouParser {
         task.status = TaskStatus.parseFailed;
         return;
       }
-      var kuaishouCookies = userinfo.kuaishouCookie;
+      var platinfo=userinfo.getPlatformInfo(VideoPlatform.kwai);
+      if (platinfo == null) {
+        task.errMsg = '用户快手没有登录';
+        task.status = TaskStatus.parseFailed;
+        return;
+      }
+      var kuaishouCookies = platinfo.cookie;
       if (kuaishouCookies == null) {
         task.errMsg = '用户快手cookie未找到';
         task.status = TaskStatus.parseFailed;
@@ -124,7 +131,7 @@ class KuaishouParser {
         );
         if (buttonText == '马上登录') {
           logger.i('clear cookies');
-          await AccountService.instance.updateKuaishouCookie(task.userId, null);
+          await AccountService.instance.updatePlatformInfo(task.userId, PlatformInfo(platform: VideoPlatform.kwai));
           task.errMsg = '用户未登录';
           task.status = TaskStatus.parseFailed;
           return;

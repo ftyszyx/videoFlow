@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:hive/hive.dart';
 import 'package:get/get.dart';
 import 'package:videoflow/models/db/account.dart';
-import 'package:videoflow/utils/logger.dart';
+import 'package:videoflow/models/db/platform_info.dart';
 
 class AccountService extends GetxService {
   static AccountService get instance => Get.find<AccountService>();
@@ -31,41 +31,23 @@ class AccountService extends GetxService {
       Account(
         id: key,
         name: account.name,
-        kuaishouCookie: account.kuaishouCookie,
-        kuaishouUserName: account.kuaishouUserName,
-        kuaishouUserId: account.kuaishouUserId,
+        platformInfos: account.platformInfos,
       ),
     );
     _changed.add(null);
   }
 
-  Future<void> updateKuaishouCookie(
-    String id,
-    Map<String, String>? cookie,
-  ) async {
+  Future<void> updatePlatformInfo(String id, PlatformInfo platformInfo) async {
     var account = _box.get(id);
     if (account != null) {
-      account.kuaishouCookie = cookie;
-      if (cookie != null) {
-        var expireTime = cookie["Expires"];
-        if (expireTime != null) {
-          account.kuaishouExpireTime = DateTime.parse(
-            expireTime,
-          ).millisecondsSinceEpoch;
-        }
+      account.platformInfos ??= [];
+      final list = account.platformInfos!;
+      final idx = list.indexWhere((e) => e.platform == platformInfo.platform);
+      if (idx >= 0) {
+        list[idx] = platformInfo;
+      } else {
+        list.add(platformInfo);
       }
-      logger.i("updateKuaishouCookie: ${account.toString()}");
-      await put(account);
-    }
-  }
-
-  Future<void> updateXiaoDianCookie(
-    String id,
-    Map<String, String> cookie,
-  ) async {
-    var account = _box.get(id);
-    if (account != null) {
-      account.xiaoDianCookie = cookie;
       await put(account);
     }
   }

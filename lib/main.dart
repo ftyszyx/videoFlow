@@ -5,7 +5,10 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:videoflow/models/db/account.dart';
+import 'package:videoflow/models/db/platform_info.dart';
+import 'package:videoflow/models/db/task_status_adapter.dart';
 import 'package:videoflow/models/db/video_task.dart';
+import 'package:videoflow/models/db/video_platform_adapter.dart';
 import 'package:videoflow/modules/log/debug_log_page.dart';
 import 'package:videoflow/routes/app_pages.dart';
 import 'package:videoflow/services/account_service.dart';
@@ -57,6 +60,9 @@ Future initServices() async {
   Hive.registerAdapter(AccountAdapter());
   Hive.registerAdapter(VideoTaskAdapter());
   Hive.registerAdapter(CoverStyleAdapter());
+  Hive.registerAdapter(VideoPlatformAdapter());
+  Hive.registerAdapter(PlatformInfoAdapter());
+  Hive.registerAdapter(TaskStatusAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
@@ -151,19 +157,7 @@ class MyApp extends StatelessWidget {
                   //只在Debug、Profile模式显示
                   Visibility(
                     visible: !kReleaseMode,
-                    child: Positioned(
-                      right: 12,
-                      bottom: 100 + context.mediaQueryViewPadding.bottom,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: ElevatedButton(
-                          child: const Text("DEBUG LOG"),
-                          onPressed: () {
-                            Get.bottomSheet(const DebugLogPage());
-                          },
-                        ),
-                      ),
-                    ),
+                    child: _DraggableDebugButton(),
                   ),
                 ],
               ),
@@ -171,6 +165,64 @@ class MyApp extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+class _DraggableDebugButton extends StatefulWidget {
+  const _DraggableDebugButton();
+  @override
+  State<_DraggableDebugButton> createState() => _DraggableDebugButtonState();
+}
+
+class _DraggableDebugButtonState extends State<_DraggableDebugButton> {
+  final GlobalKey _btnKey = GlobalKey();
+  Offset _pos = const Offset(0, 0);
+  Size _btnSize = Size.zero;
+  bool _inited = false;
+  void _ensureInit(BuildContext context) {
+    if (_inited) return;
+    final size = MediaQuery.sizeOf(context);
+    final bottomPad = context.mediaQueryViewPadding.bottom;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final rb = _btnKey.currentContext?.findRenderObject() as RenderBox?;
+      setState(() {
+        _btnSize = rb?.size ?? const Size(120, 40);
+        _pos = Offset(size.width - _btnSize.width - 12, size.height - _btnSize.height - (100 + bottomPad));
+        _inited = true;
+      });
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    _ensureInit(context);
+    final screen = MediaQuery.sizeOf(context);
+    return Positioned(
+      left: _pos.dx,
+      top: _pos.dy,
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onPanUpdate: (d) {
+            final dx = (_pos.dx + d.delta.dx).clamp(0.0, screen.width - _btnSize.width);
+            final dy = (_pos.dy + d.delta.dy).clamp(0.0, screen.height - _btnSize.height);
+            setState(() => _pos = Offset(dx, dy));
+          },
+          child: Opacity(
+            opacity: 0.4,
+            child: ElevatedButton(
+              key: _btnKey,
+              child: const Text("DEBUG LOG"),
+              onPressed: () async {
+                if (Get.isBottomSheetOpen == true) {
+                  Get.back<void>();
+                  await Future.delayed(const Duration(milliseconds: 150));
+                }
+                Get.to(() => const DebugLogPage(), fullscreenDialog: true);
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

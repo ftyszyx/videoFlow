@@ -8,7 +8,7 @@ part of 'cover_style.dart';
 
 class CoverStyleAdapter extends TypeAdapter<CoverStyle> {
   @override
-  final int typeId = 3;
+  final int typeId = 1;
 
   @override
   CoverStyle read(BinaryReader reader) {

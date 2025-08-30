@@ -1,38 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'account.dart';
+part of 'platform_info.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class AccountAdapter extends TypeAdapter<Account> {
+class PlatformInfoAdapter extends TypeAdapter<PlatformInfo> {
   @override
-  final int typeId = 0;
+  final int typeId = 2;
 
   @override
-  Account read(BinaryReader reader) {
+  PlatformInfo read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Account(
-      id: fields[0] as String?,
-      name: fields[10] as String?,
-      platformInfos: (fields[20] as List?)?.cast<PlatformInfo>(),
+    return PlatformInfo(
+      userId: fields[0] as String?,
+      userName: fields[10] as String?,
+      platform: fields[20] as VideoPlatform,
+      headUrl: fields[30] as String?,
+      cookie: (fields[40] as Map?)?.cast<String, String>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, Account obj) {
+  void write(BinaryWriter writer, PlatformInfo obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
-      ..write(obj.id)
+      ..write(obj.userId)
       ..writeByte(10)
-      ..write(obj.name)
+      ..write(obj.userName)
       ..writeByte(20)
-      ..write(obj.platformInfos);
+      ..write(obj.platform)
+      ..writeByte(30)
+      ..write(obj.headUrl)
+      ..writeByte(40)
+      ..write(obj.cookie);
   }
 
   @override
@@ -41,7 +47,7 @@ class AccountAdapter extends TypeAdapter<Account> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AccountAdapter &&
+      other is PlatformInfoAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
