@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:puppeteer/puppeteer.dart';

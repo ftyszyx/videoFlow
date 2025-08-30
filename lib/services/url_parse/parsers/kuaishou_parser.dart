@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:puppeteer/puppeteer.dart';
 import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';

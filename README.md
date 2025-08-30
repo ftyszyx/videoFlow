@@ -56,7 +56,7 @@ https://pub.dev/packages/flutter_painter_v2
 https://www.gaoding.com/editor/design?mode=user&category_id=370&type=poster&width=1242&height=2208&unit=px&dpi=72&id=33610099700772948
 1.全屏页面
 1.分四列
-    第一列是工具箱：文字，图片，背景
+    第一列是工具箱：文字，图片，背景(可以是图片，也可以是纯色)
     第二列是，预选page
         点文字，显示几种大小的文字给用户选择，点击后，在封面中添加文字
         选图片，弹出图片选择框，选择后添加对应图片在封面中
@@ -77,10 +77,4 @@ https://www.gaoding.com/editor/design?mode=user&category_id=370&type=poster&widt
 1.发布
 
 
-
-
-可选（自动化下载本地化）
-新建目录 packages/，一条命令拉下来：
-git clone https://github.com/hm21/pro_image_editor.git -b stable packages/pro_image_editor
-pubspec.yaml 写：path: packages/pro_image_editor
-这样就完成了本地路径集成，后续在 CoverStyleEditorPage 里直接用 package:pro_image_editor/pro_image_editor.dart 即可。
+https://github.com/palxiao/poster-design

@@ -4,7 +4,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.8.1  # dart
+  flutter: ">=3.35.0" # flutter
 
 dependencies:
   flutter:
@@ -41,6 +42,9 @@ dependencies:
   lottie: ^1.4.3 #lottie动画
   dynamic_color: ^1.8.1
   remixicon: ^1.4.1
+  pro_image_editor: 
+    path: packages/pro_image_editor
+
   # flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
