@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/modules/task/task_control.dart';
 import 'package:videoflow/utils/app_style.dart';
 
@@ -56,6 +58,19 @@ class TaskPage extends GetView<TaskControl> {
                     children: [
                       Expanded(
                         child: TextField(
+                          controller: controller.nameController,
+                          decoration: const InputDecoration(labelText: '任务名称'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      //input task name
+                      Expanded(
+                        child: TextField(
                           controller: controller.shareLinkController,
                           decoration: const InputDecoration(
                             labelText: '分享链接',
@@ -63,7 +78,10 @@ class TaskPage extends GetView<TaskControl> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                    ],
+                  ),
+                  Row(
+                    children: [
                       Obx(
                         () => DropdownButton<String>(
                           value:
@@ -86,49 +104,9 @@ class TaskPage extends GetView<TaskControl> {
                       ),
                     ],
                   ),
-                  // const SizedBox(height: 12),
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: TextField(
-                  //         controller: controller.videoTitleController,
-                  //         decoration: const InputDecoration(labelText: '标题'),
-                  //       ),
-                  //     ),
-                  //     const SizedBox(width: 12),
-                  //     Expanded(
-                  //       child: TextField(
-                  //         controller: controller.subTitleController,
-                  //         decoration: const InputDecoration(labelText: '副标题'),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      // Expanded(
-                      //   child: Obx(
-                      //     () => DropdownButton<String>(
-                      //       value:
-                      //           controller.selectedCoverStyleId.value.isNotEmpty
-                      //           ? controller.selectedCoverStyleId.value
-                      //           : null,
-                      //       hint: const Text('选择封面样式'),
-                      //       items: controller.coverStyles
-                      //           .map(
-                      //             (s) => DropdownMenuItem(
-                      //               value: s.id,
-                      //               child: Text(s.name),
-                      //             ),
-                      //           )
-                      //           .toList(),
-                      //       onChanged: (v) =>
-                      //           controller.selectedCoverStyleId.value = v ?? '',
-                      //     ),
-                      //   ),
-                      // ),
-                      // const SizedBox(width: 12),
                       Obx(() {
                         final path = controller.coverPath;
                         return Text(
@@ -188,32 +166,158 @@ class _TaskList extends GetView<TaskControl> {
       }
       return ListView.separated(
         itemCount: tasks.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final t = tasks[index];
-          return ListTile(
-            title: Text(t.videoTitle.isNotEmpty ? t.videoTitle : t.name),
-            subtitle: Text('${t.subTitle}\n状态: ${t.status?.title ?? '未开始'}'),
-            isThreeLine: true,
-            trailing: Wrap(
-              spacing: 8,
-              children: [
-                IconButton(
-                  tooltip: '开始',
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () => controller.startTask(t),
-                ),
-                IconButton(
-                  tooltip: '暂停',
-                  icon: const Icon(Icons.pause),
-                  onPressed: () => controller.pauseTask(t),
-                ),
-                IconButton(
-                  tooltip: '删除',
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => controller.deleteTask(t),
-                ),
-              ],
+          final theme = Theme.of(context);
+          var statusTitle = '${t.status?.title}' ?? '未开始';
+          if (t.errMsg.isNotEmpty) {
+            statusTitle = '${t.status?.title}:(${t.errMsg})';
+          }
+          final statusColor = t.status == null
+              ? theme.colorScheme.outline
+              : (t.status == TaskStatus.downloadFailed ||
+                    t.status == TaskStatus.parseFailed ||
+                    t.status == TaskStatus.videoMergeFailed)
+              ? theme.colorScheme.error
+              : t.status == TaskStatus.pause
+              ? theme.colorScheme.tertiary
+              : theme.colorScheme.primary;
+          return Card(
+            clipBehavior: Clip.antiAlias,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: theme.dividerColor.withValues(alpha: .1)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // cover thumbnail
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(8),
+                      image: t.coverPath.isNotEmpty
+                          ? DecorationImage(
+                              image: t.coverPath.startsWith('http')
+                                  ? NetworkImage(t.coverPath)
+                                  : (File(t.coverPath).existsSync()
+                                        ? FileImage(File(t.coverPath))
+                                              as ImageProvider
+                                        : AssetImage(t.coverPath)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: t.coverPath.isEmpty
+                        ? const Icon(Icons.image_outlined, size: 24)
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  // main info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                t.name,
+                                style: theme.textTheme.titleMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                statusTitle,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        if (t.subTitle?.isNotEmpty == true ||
+                            t.videoTitle?.isNotEmpty == true)
+                          Text(
+                            [
+                              t.videoTitle,
+                              t.subTitle,
+                            ].where((e) => e?.isNotEmpty == true).join(' · '),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.hintColor,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(Icons.link, size: 14, color: theme.hintColor),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                t.shareLink,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.hintColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // actions
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      Tooltip(
+                        message: '开始',
+                        child: IconButton(
+                          icon: const Icon(Icons.play_arrow),
+                          onPressed: () => controller.startTask(t),
+                        ),
+                      ),
+                      Tooltip(
+                        message: '暂停',
+                        child: IconButton(
+                          icon: const Icon(Icons.pause),
+                          onPressed: () => controller.pauseTask(t),
+                        ),
+                      ),
+                      Tooltip(
+                        message: '删除',
+                        child: IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () => controller.deleteTask(t),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },

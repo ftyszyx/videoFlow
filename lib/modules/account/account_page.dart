@@ -147,8 +147,9 @@ class AccountPage extends GetView<AccountControl> {
   }
 
   _KsStatus _computeStatus(PlatformInfo? platformInfo) {
-    var cookie = platformInfo?.cookie;
+    var cookie = platformInfo?.cookies;
     if (cookie == null || cookie.isEmpty) return _KsStatus('未登录', Colors.grey);
+    if (platformInfo?.isExpire == true) return _KsStatus('已过期', Colors.red);
     return _KsStatus('已登录', Colors.green);
   }
 

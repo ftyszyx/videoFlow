@@ -36,7 +36,8 @@ enum TaskStatus {
   videoMergeCompleted('视频合并完成', 33),
   addCover('添加封面', 34),
   //暂停
-  pause('暂停', 41);
+  pause('暂停', 41),
+  success('成功', 50);
 
   final String title;
   final int code;

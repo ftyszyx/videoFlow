@@ -21,14 +21,14 @@ class PlatformInfoAdapter extends TypeAdapter<PlatformInfo> {
       userName: fields[10] as String?,
       platform: fields[20] as VideoPlatform,
       headUrl: fields[30] as String?,
-      cookie: (fields[40] as Map?)?.cast<String, String>(),
-    );
+      cookies: (fields[40] as List?)?.cast<Cookie>(),
+    )..isExpire = fields[50] as bool?;
   }
 
   @override
   void write(BinaryWriter writer, PlatformInfo obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(10)
@@ -38,7 +38,9 @@ class PlatformInfoAdapter extends TypeAdapter<PlatformInfo> {
       ..writeByte(30)
       ..write(obj.headUrl)
       ..writeByte(40)
-      ..write(obj.cookie);
+      ..write(obj.cookies)
+      ..writeByte(50)
+      ..write(obj.isExpire);
   }
 
   @override

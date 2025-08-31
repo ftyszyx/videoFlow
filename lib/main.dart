@@ -67,6 +67,7 @@ Future initServices() async {
   Hive.registerAdapter(TaskStatusAdapter());
   Hive.registerAdapter(DownloadFileTypeAdapter());
   Hive.registerAdapter(VideoTaskSegmentAdapter());
+  Hive.registerAdapter(CookieAdapter());
   CommonUtils.packageInfo = await PackageInfo.fromPlatform();
   await Get.put(AppConfigService()).init();
   await Get.put(AccountService()).init();
@@ -201,32 +202,41 @@ class _DraggableDebugButtonState extends State<_DraggableDebugButton> {
   Widget build(BuildContext context) {
     _ensureInit(context);
     final screen = MediaQuery.sizeOf(context);
-    return Positioned(
-      left: _pos.dx,
-      top: _pos.dy,
-      child: ExcludeSemantics(
-        child: GestureDetector(
-          onPanUpdate: (d) {
-            final dx = (_pos.dx + d.delta.dx).clamp(0.0, screen.width - _btnSize.width);
-            final dy = (_pos.dy + d.delta.dy).clamp(0.0, screen.height - _btnSize.height);
-            setState(() => _pos = Offset(dx, dy));
-          },
-          child: Opacity(
-            opacity: 0.4,
-            child: ElevatedButton(
-              key: _btnKey,
-              child: const Text("DEBUG LOG"),
-              onPressed: () async {
-                if (Get.isBottomSheetOpen == true) {
-                  Get.back<void>();
-                  await Future.delayed(const Duration(milliseconds: 150));
-                }
-                Get.to(() => const DebugLogPage(), fullscreenDialog: true);
-              },
-            ),
+    final bottomPad = context.mediaQueryViewPadding.bottom;
+    final btn = ExcludeSemantics(
+      child: GestureDetector(
+        onPanUpdate: (d) {
+          final dx = (_pos.dx + d.delta.dx).clamp(0.0, screen.width - _btnSize.width);
+          final dy = (_pos.dy + d.delta.dy).clamp(0.0, screen.height - _btnSize.height);
+          setState(() => _pos = Offset(dx, dy));
+        },
+        child: Opacity(
+          opacity: 0.4,
+          child: ElevatedButton(
+            key: _btnKey,
+            child: const Text("DEBUG LOG"),
+            onPressed: () async {
+              if (Get.isBottomSheetOpen == true) {
+                Get.back<void>();
+                await Future.delayed(const Duration(milliseconds: 150));
+              }
+              Get.to(() => const DebugLogPage(), fullscreenDialog: true);
+            },
           ),
         ),
       ),
+    );
+    if (!_inited) {
+      return Positioned(
+        right: 12,
+        bottom: 100 + bottomPad,
+        child: btn,
+      );
+    }
+    return Positioned(
+      left: _pos.dx,
+      top: _pos.dy,
+      child: btn,
     );
   }
 }

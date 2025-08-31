@@ -44,9 +44,9 @@ class QrAuthSession {
   Future<void> onLoginOk() async {
     final cookies = await browser!.page!.cookies();
     if (cookies.isNotEmpty) {
-      platformInfo.cookie = {};
+      platformInfo.cookies = [];
       for (var cookie in cookies) {
-        platformInfo.cookie![cookie.name] = cookie.value;
+        platformInfo.cookies!.add(cookie);
       }
       logger.i("updatePlatformInfo:${platformInfo.toString()}");
       await AccountService.instance.updatePlatformInfo(userId!, platformInfo);

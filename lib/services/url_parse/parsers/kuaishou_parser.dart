@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:videoflow/models/db/platform_info.dart';
 import 'package:videoflow/services/account_service.dart';
+import 'package:videoflow/services/task_servcie.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
 import 'package:videoflow/entity/url_parse.dart';
@@ -11,12 +11,11 @@ class KuaishouParser {
   static Future<void> parse(VideoTask task) async {
     final shortUrl = _extractShortUrl(task.shareLink);
     if (shortUrl == null) {
-      task.errMsg = '在分享文本中找不到有效的快手短链接';
-      task.status = TaskStatus.parseFailed;
+      TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '在分享文本中找不到有效的快手短链接');
       return;
     }
     logger.i('提取到短链接: $shortUrl');
-    await _getRedirectUrl(task: task);
+    await _getRedirectUrl(task: task, shortUrl: shortUrl);
     if (task.status == TaskStatus.parseFailed || task.isPaused()) {
       return;
     }
@@ -40,7 +39,7 @@ class KuaishouParser {
     return match?.group(0);
   }
 
-  static Future<void> _getRedirectUrl({required VideoTask task}) async {
+  static Future<void> _getRedirectUrl({required VideoTask task, required String shortUrl}) async {
     BrowserSession? browserSession;
     Map<String, LiveDetail> responseLiveDetails = {};
     LiveDetail? getLiveDetail;
@@ -48,26 +47,23 @@ class KuaishouParser {
       logger.i('正在启动本地浏览器以解析链接 ...');
       var userinfo = AccountService.instance.getUser(task.userId);
       if (userinfo == null) {
-        task.errMsg = '用户信息未找到';
-        task.status = TaskStatus.parseFailed;
+        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户信息未找到');
         return;
       }
       var platinfo=userinfo.getPlatformInfo(VideoPlatform.kwai);
       if (platinfo == null) {
-        task.errMsg = '用户快手没有登录';
-        task.status = TaskStatus.parseFailed;
+        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户快手没有登录');
         return;
       }
-      var kuaishouCookies = platinfo.cookie;
+      var kuaishouCookies = platinfo.cookies;
       if (kuaishouCookies == null) {
-        task.errMsg = '用户快手cookie未找到';
-        task.status = TaskStatus.parseFailed;
+        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户快手cookie未找到');
         return;
       }
       browserSession = await CommonUtils.runBrowser(
-        url: task.shareLink,
+        url: shortUrl,
         cookies: kuaishouCookies,
-        forceShowBrowser: false,
+        forceShowBrowser: true,
         onRequest: (request) {
           if (request.url.contains('.mp4')) {
             final videoUrl = Uri.parse(request.url);
@@ -131,9 +127,8 @@ class KuaishouParser {
         );
         if (buttonText == '马上登录') {
           logger.i('clear cookies');
-          await AccountService.instance.updatePlatformInfo(task.userId, PlatformInfo(platform: VideoPlatform.kwai));
-          task.errMsg = '用户未登录';
-          task.status = TaskStatus.parseFailed;
+          await AccountService.instance.setPlatformInfoExpire(task.userId, VideoPlatform.kwai);
+          TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户未登录');
           return;
         }
       } catch (e) {
@@ -144,13 +139,10 @@ class KuaishouParser {
       var retryCount = 0;
       while (task.downloadUrl == null) {
         if (retryCount > 20) {
-          task.errMsg = '重试次数过多';
-          task.status = TaskStatus.parseFailed;
+          TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '重试次数过多');
           return;
         }
         if (task.isPaused()) {
-          task.errMsg = '暂停';
-          task.status = TaskStatus.parseFailed;
           return;
         }
         final videokey = 'VisionVideoDetailPhoto:$videoid';
@@ -197,8 +189,7 @@ class KuaishouParser {
         task.downloadUrl = getLiveDetail.replayUrl;
       }
     }
-    task.errMsg = '未知错误';
-    task.status = TaskStatus.parseFailed;
+    TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '未知错误');
     return;
   }
 }

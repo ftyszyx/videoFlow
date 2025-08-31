@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:puppeteer/puppeteer.dart';
+import 'package:puppeteer/puppeteer.dart' ;
+import 'package:puppeteer/protocol/network.dart' as puppeteer_network;
 import 'package:path/path.dart' as path;
 import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/services/app_config_service.dart';
@@ -74,12 +75,13 @@ class CommonUtils {
   //https://peter.sh/experiments/chromium-command-line-switches/#net-log
   static Future<BrowserSession> runBrowser({
     required String url,
-    Map<String, String>? cookies,
+    List<puppeteer_network.Cookie>? cookies,
     bool forceShowBrowser = false,
     Function(Request)? onRequest,
     Function(Response)? onResponse,
   }) async {
     try {
+      logger.i('runbrowser: $url');
       final String exeDir = path.dirname(Platform.resolvedExecutable);
       logger.i('exeDir: $exeDir');
       final String chromiumPath = path.join(
@@ -123,9 +125,9 @@ class CommonUtils {
         userDataDir: userDataDir,
       );
       final page = await browser.newPage();
-      page.onConsole.listen((event) {
-        logger.d('browser_log: ${event.text}');
-      });
+      // page.onConsole.listen((event) {
+      //   logger.d('browser_log: ${event.text}');
+      // });
       page.onRequest.listen((request) {
         if (onRequest != null) {
           onRequest(request);
@@ -139,10 +141,15 @@ class CommonUtils {
       await page.setUserAgent(AppConfigService.instance.userAgent);
       // await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
       if (cookies != null) {
-        var cookieList = cookies.entries
-            .map((e) => CookieParam(name: e.key, value: e.value))
-            .toList();
-        await page.setCookies(cookieList);
+        logger.i('setCookies: $cookies');
+        await page.setCookies(
+          cookies
+              .map(
+                (e) =>
+                    CookieParam(name: e.name, value: e.value, domain: e.domain),
+              )
+              .toList(),
+        );
       }
       logger.i('浏览器正在导航到: $url');
       await page.goto(

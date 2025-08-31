@@ -16,6 +16,7 @@ import 'package:videoflow/models/db/cover_style.dart';
 class TaskControl extends GetxController {
   // Form controllers
   final TextEditingController shareLinkController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController videoTitleController = TextEditingController();
   final TextEditingController subTitleController = TextEditingController();
 
@@ -67,7 +68,7 @@ class TaskControl extends GetxController {
 
   Future<void> addTask() async {
     final String shareLink = shareLinkController.text.trim();
-    final String title = videoTitleController.text.trim();
+    final String title = nameController.text.trim();
     final String subtitle = subTitleController.text.trim();
     final String? userId = selectedAccountId?.value.isNotEmpty == true
         ? selectedAccountId!.value
@@ -82,10 +83,9 @@ class TaskControl extends GetxController {
       id: const Uuid().v4(),
       shareLink: shareLink,
       userId: userId,
+      name: title,
       coverPath: coverPath,
-      videoTitle: title,
       subTitle: subtitle,
-      name: title.isNotEmpty ? title : '任务',
     )..status = TaskStatus.init;
     task.coverStyleId = selectedCoverStyleId.value.isNotEmpty
         ? selectedCoverStyleId.value

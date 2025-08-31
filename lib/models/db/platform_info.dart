@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:puppeteer/protocol/network.dart';
 import 'package:videoflow/entity/common.dart';
 import 'dart:convert';
 
@@ -16,14 +17,16 @@ class PlatformInfo {
   @HiveField(30)
   String? headUrl;
   @HiveField(40)
-  Map<String, String>? cookie;
+  List<Cookie>? cookies;
+  @HiveField(50)
+  bool? isExpire ;
 
   PlatformInfo({
     this.userId,
     this.userName,
     required this.platform,
     this.headUrl,
-    this.cookie,
+    this.cookies,
   });
 
   toJson() => {
@@ -31,7 +34,8 @@ class PlatformInfo {
     'userName': userName,
     'platform': platform.name,
     'headUrl': headUrl,
-    'cookie': cookie,
+    'cookie': jsonEncode(cookies),
+    'isExpire': isExpire,
   };
 
   @override
@@ -39,3 +43,5 @@ class PlatformInfo {
     return jsonEncode(toJson());
   }
 }
+
+

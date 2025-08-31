@@ -11,9 +11,8 @@ class VideoTask {
     required this.shareLink,
     required this.userId,
     required this.coverPath,
-    required this.videoTitle,
     required this.subTitle,
-    this.name = '',
+    required this.name,
   });
   //自动生成
   @HiveField(0)
@@ -31,11 +30,11 @@ class VideoTask {
 
   //视频标题
   @HiveField(40)
-  String videoTitle;
+  String? videoTitle;
 
   //视频副标题
   @HiveField(50)
-  String subTitle;
+  String? subTitle;
 
   //视频平台
   @HiveField(60)
@@ -124,4 +123,5 @@ class VideoTask {
     }
     return status!.code >= TaskStatus.parseCompleted.code;
   }
+
 }

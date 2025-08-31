@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:puppeteer/puppeteer.dart' as pup;
 import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/entity/qr.dart';

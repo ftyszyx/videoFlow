@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:hive/hive.dart';
 import 'package:get/get.dart';
+import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/models/db/account.dart';
 import 'package:videoflow/models/db/platform_info.dart';
 
@@ -49,6 +50,19 @@ class AccountService extends GetxService {
         list.add(platformInfo);
       }
       await put(account);
+    }
+  }
+
+  Future<void> setPlatformInfoExpire(String id, VideoPlatform platform) async {
+    var account = _box.get(id);
+    if (account != null) {
+      account.platformInfos ??= [];
+      final list = account.platformInfos!;
+      final idx = list.indexWhere((e) => e.platform == platform);
+      if (idx >= 0) {
+        list[idx].isExpire = true;
+        await put(account);
+      }
     }
   }
 
