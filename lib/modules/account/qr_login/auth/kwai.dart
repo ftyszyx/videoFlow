@@ -13,16 +13,25 @@ class KwaiQrSession extends QrAuthSession {
 
   @override
   Future<void> afterRun() async {
+    logger.i("KwaiQrSession afterRun");
     if (browser == null) {
+      logger.i("KwaiQrSession afterRun browser is null");
       return;
     }
     final page = browser!.page!;
+    logger.i("KwaiQrSession afterRun page is not null");
     try {
       final loginText = await page.evaluate(
         'document.querySelector("p.user-default").innerText',
       );
       if (loginText == '登录') {
-        await page.click('p.user-default');
+        logger.i("wait for login button");
+           await page.waitForSelector('p.user-default', timeout: const Duration(seconds: 15));
+        // logger.i("delay 3 seconds");
+        // await Future.delayed(const Duration(seconds: 3));
+        logger.i("click login");
+        //  await page.evaluate('document.querySelector("p.user-default")?.click()');
+         await page.click('p.user-default');
       } else {
         logger.e("没找到登录按钮");
       }
@@ -69,7 +78,7 @@ class KwaiQrSession extends QrAuthSession {
         final resCode = jsonData['result'];
         if (resCode == 1) {
           logger.i("login success:${jsonEncode(jsonData)}");
-          await onLoginOk();
+          onLoginOk(["https://www.kuaishou.com","https://id.kuaishou.com"]);
         }
       }
     } catch (e, s) {

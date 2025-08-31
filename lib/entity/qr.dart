@@ -6,8 +6,8 @@ import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/common.dart';
 import 'package:videoflow/utils/logger.dart';
 
-
 enum QRStatus { loading, unscanned, scanned, expired, failed, success }
+
 class QrAuthSession {
   String? userId;
   final VideoPlatform platform; // 平台类型
@@ -32,20 +32,28 @@ class QrAuthSession {
 
   Future<void> onStart(String userId) async {
     this.userId = userId;
-    _browser = await CommonUtils.runBrowser(
-      url: startUrl,
-      forceShowBrowser: false,
-      onRequest: onRequest,
-      onResponse: onResponse,
-    );
-    await afterRun();
+    try {
+      _browser = await CommonUtils.runBrowser(
+        url: startUrl,
+        forceShowBrowser: true,
+        onRequest: onRequest,
+        onResponse: onResponse,
+      );
+      await afterRun();
+    } catch (e, s) {
+      logger.e("onStart error", error: e, stackTrace: s);
+    }
   }
 
-  Future<void> onLoginOk() async {
-    final cookies = await browser!.page!.cookies();
+  Future<void> onLoginOk(List<String> urls) async {
+    logger.i("wait for cookies:${urls.join(",")}");
+    await Future.delayed(const Duration(seconds: 3));
+    final pageIns = browser!.page!;
+    final cookies = await pageIns.cookies(urls: urls);
     if (cookies.isNotEmpty) {
       platformInfo.cookies = [];
       for (var cookie in cookies) {
+        logger.i("add cookie: ${cookie.name.toString()}");
         platformInfo.cookies!.add(cookie);
       }
       logger.i("updatePlatformInfo:${platformInfo.toString()}");

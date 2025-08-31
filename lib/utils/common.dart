@@ -112,8 +112,7 @@ class CommonUtils {
         args.add('--headless=new'); // 新 headless，Windows 更稳定
       }
       final userDataDir = path.join(
-        AppConfigService.instance.appDataPath,
-        'chrome-profile',
+        AppConfigService.instance.chromeDataPath,
         DateTime.now().millisecondsSinceEpoch.toString(),
       );
       logger.i('userDataDir: $userDataDir');

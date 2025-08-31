@@ -18,6 +18,8 @@ class AppConfigService extends GetxService {
   late String _appConfigPath;
   String get appConfigPath => _appConfigPath;
 
+  String get chromeDataPath => path.join(_appDataPath, 'chrome-data');
+
   final String _userAgent =
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
   String get userAgent => _userAgent;
@@ -47,6 +49,7 @@ class AppConfigService extends GetxService {
       File(appConfigPath).createSync(recursive: true);
       File(appConfigPath).writeAsStringSync(json.encode(_config));
     }
+    await initChromeDataPath();
   }
 
   void setLogLevel(LogLevel level) {
@@ -73,4 +76,13 @@ class AppConfigService extends GetxService {
     _config.remove(key);
     File(appConfigPath).writeAsStringSync(json.encode(_config));
   }
+
+ Future initChromeDataPath() async {
+  if (!Directory(chromeDataPath).existsSync()) {
+    Directory(chromeDataPath).createSync(recursive: true);
+  }else{
+    await Directory(chromeDataPath).delete(recursive: true);
+    Directory(chromeDataPath).createSync(recursive: true);
+  }
+ }
 }

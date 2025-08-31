@@ -53,7 +53,7 @@ class KwaiShopQrSession extends QrAuthSession {
         final code = jsonData["result"];
         if (code == 1) {
           logger.i("login auth ok:${jsonEncode(jsonData)}");
-          await onLoginOk();
+          onLoginOk(["https://www.kuaishou.com","https://id.kwaixiaodian.com","https://login.kwaixiaodian.com"]);
         }
       }
     } catch (e, s) {

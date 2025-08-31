@@ -9,9 +9,14 @@ import 'package:videoflow/models/db/video_task.dart';
 
 class KuaishouParser {
   static Future<void> parse(VideoTask task) async {
+    task.downloadUrl = null;
     final shortUrl = _extractShortUrl(task.shareLink);
     if (shortUrl == null) {
-      TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '在分享文本中找不到有效的快手短链接');
+      TaskService.instance.updateStatus(
+        id: task.id,
+        status: TaskStatus.parseFailed,
+        errMsg: '在分享文本中找不到有效的快手短链接',
+      );
       return;
     }
     logger.i('提取到短链接: $shortUrl');
@@ -39,7 +44,10 @@ class KuaishouParser {
     return match?.group(0);
   }
 
-  static Future<void> _getRedirectUrl({required VideoTask task, required String shortUrl}) async {
+  static Future<void> _getRedirectUrl({
+    required VideoTask task,
+    required String shortUrl,
+  }) async {
     BrowserSession? browserSession;
     Map<String, LiveDetail> responseLiveDetails = {};
     LiveDetail? getLiveDetail;
@@ -47,17 +55,29 @@ class KuaishouParser {
       logger.i('正在启动本地浏览器以解析链接 ...');
       var userinfo = AccountService.instance.getUser(task.userId);
       if (userinfo == null) {
-        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户信息未找到');
+        TaskService.instance.updateStatus(
+          id: task.id,
+          status: TaskStatus.parseFailed,
+          errMsg: '用户信息未找到',
+        );
         return;
       }
-      var platinfo=userinfo.getPlatformInfo(VideoPlatform.kwai);
+      var platinfo = userinfo.getPlatformInfo(VideoPlatform.kwai);
       if (platinfo == null) {
-        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户快手没有登录');
+        TaskService.instance.updateStatus(
+          id: task.id,
+          status: TaskStatus.parseFailed,
+          errMsg: '用户快手没有登录',
+        );
         return;
       }
       var kuaishouCookies = platinfo.cookies;
       if (kuaishouCookies == null) {
-        TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户快手cookie未找到');
+        TaskService.instance.updateStatus(
+          id: task.id,
+          status: TaskStatus.parseFailed,
+          errMsg: '用户快手cookie未找到',
+        );
         return;
       }
       browserSession = await CommonUtils.runBrowser(
@@ -127,19 +147,30 @@ class KuaishouParser {
         );
         if (buttonText == '马上登录') {
           logger.i('clear cookies');
-          await AccountService.instance.setPlatformInfoExpire(task.userId, VideoPlatform.kwai);
-          TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '用户未登录');
+          await AccountService.instance.setPlatformInfoExpire(
+            task.userId,
+            VideoPlatform.kwai,
+          );
+          TaskService.instance.updateStatus(
+            id: task.id,
+            status: TaskStatus.parseFailed,
+            errMsg: '用户未登录',
+          );
           return;
         }
       } catch (e) {
-        logger.w('get buttonElement failed, maybe not need login', error: e);
+        logger.i('get buttonElement failed, not need login');
       }
 
       //keep waiting
       var retryCount = 0;
       while (task.downloadUrl == null) {
         if (retryCount > 20) {
-          TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '重试次数过多');
+          TaskService.instance.updateStatus(
+            id: task.id,
+            status: TaskStatus.parseFailed,
+            errMsg: '重试次数过多',
+          );
           return;
         }
         if (task.isPaused()) {
@@ -164,32 +195,45 @@ class KuaishouParser {
               getLiveDetail.title = title;
               getLiveDetail.duration = duration ~/ 1000;
               getLiveDetail.liveId = videoid;
+              break;
             }
           }
         }
         if (responseLiveDetails.containsKey(videoid)) {
           getLiveDetail = responseLiveDetails[videoid]!;
           logger.i('使用responseLiveDetails中的数据 inwhile: ${task.srcVideoTitle}');
-          return;
+          break;
         }
         await Future.delayed(const Duration(seconds: 1));
         retryCount++;
       }
-    } catch (e, stackTrace) {
-      logger.e('使用浏览器解析链接失败', error: e, stackTrace: stackTrace);
-      rethrow;
-    } finally {
-      logger.i('关闭浏览器');
-      await browserSession?.close();
       if (getLiveDetail != null) {
         task.srcVideoTitle = getLiveDetail.title;
         task.srcVideoCoverUrl = getLiveDetail.coverUrl;
         task.srcVideoDuration = getLiveDetail.duration;
         task.srcVideoId = getLiveDetail.liveId;
         task.downloadUrl = getLiveDetail.replayUrl;
+        TaskService.instance.updateStatus(
+          id: task.id,
+          status: TaskStatus.parseCompleted,
+        );
+        return;
       }
+      TaskService.instance.updateStatus(
+        id: task.id,
+        status: TaskStatus.parseFailed,
+        errMsg: '未知错误',
+      );
+    } catch (e, stackTrace) {
+      logger.e('使用浏览器解析链接失败', error: e, stackTrace: stackTrace);
+      TaskService.instance.updateStatus(
+        id: task.id,
+        status: TaskStatus.parseFailed,
+        errMsg: '使用浏览器解析链接失败',
+      );
+    } finally {
+      logger.i('关闭浏览器');
+      await browserSession?.close();
     }
-    TaskService.instance.updateStatus(id: task.id, status: TaskStatus.parseFailed, errMsg: '未知错误');
-    return;
   }
 }
