@@ -1,24 +1,8 @@
 import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:videoflow/entity/common.dart';
+import 'package:videoflow/models/db/video_task_segment.dart';
 part 'video_task.g.dart';
-
-class VideoTaskSegment {
-  String url;
-  int? start;
-  int? end;
-  String name;
-  int size;
-  bool isOk;
-  VideoTaskSegment({
-    required this.url,
-    required this.name,
-    required this.isOk,
-    required this.size,
-    this.start,
-    this.end,
-  });
-}
 
 @HiveType(typeId: 4)
 class VideoTask {
@@ -114,8 +98,8 @@ class VideoTask {
     'shareLink': shareLink,
     'status': status,
     'videoTitle': videoTitle,
-    'videoPlatform': videoPlatform,
-    'downloadFileType': downloadFileType,
+    'videoPlatform': videoPlatform?.name,
+    'downloadFileType': downloadFileType?.name,
     'downloadUrl': downloadUrl,
     'downloadPath': downloadPath,
   };

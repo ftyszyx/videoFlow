@@ -4,6 +4,9 @@ import 'package:puppeteer/puppeteer.dart';
 
 enum DownloadFileType { m3u8, mp4, unknown }
 
+
+
+
 enum VideoPlatform {
   kwai('快手'),
   kwaiShop('快手小店'),

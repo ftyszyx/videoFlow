@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:get/get.dart';
 import 'package:videoflow/models/db/video_task.dart';
+import 'package:videoflow/models/db/video_task_segment.dart';
 import 'package:videoflow/services/app_config_service.dart';
 import 'package:videoflow/utils/logger.dart';
 import 'package:videoflow/entity/common.dart';

@@ -147,10 +147,11 @@ class CommonUtils {
       logger.i('浏览器正在导航到: $url');
       await page.goto(
         url,
-        wait: Until.networkIdle,
+        wait: Until.domContentLoaded,
         timeout: const Duration(seconds: 0),
       );
       //set cookies
+      logger.i('浏览器导航完成');
       return BrowserSession(
         browser: browser,
         page: page,

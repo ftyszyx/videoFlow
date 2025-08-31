@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:puppeteer/puppeteer.dart' as pup;
 import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/entity/qr.dart';
-import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/logger.dart';
 
 class KwaiQrSession extends QrAuthSession {
@@ -71,19 +70,7 @@ class KwaiQrSession extends QrAuthSession {
         final resCode = jsonData['result'];
         if (resCode == 1) {
           logger.i("login success:${jsonEncode(jsonData)}");
-          final cookies = await browser!.page!.cookies();
-          if (cookies.isNotEmpty) {
-            platformInfo.cookie = {};
-            for (var cookie in cookies) {
-              platformInfo.cookie![cookie.name] = cookie.value;
-            }
-            logger.i("updatePlatformInfo:${platformInfo.toString()}");
-            await AccountService.instance.updatePlatformInfo(
-              userId!,
-              platformInfo,
-            );
-            qrStatus.value = QRStatus.success;
-          }
+          await onLoginOk();
         }
       }
     } catch (e, s) {

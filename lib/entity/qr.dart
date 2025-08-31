@@ -2,11 +2,12 @@ import 'package:get/get_rx/get_rx.dart';
 import 'package:puppeteer/puppeteer.dart';
 import 'package:videoflow/entity/common.dart';
 import 'package:videoflow/models/db/platform_info.dart';
+import 'package:videoflow/services/account_service.dart';
 import 'package:videoflow/utils/common.dart';
+import 'package:videoflow/utils/logger.dart';
+
 
 enum QRStatus { loading, unscanned, scanned, expired, failed, success }
-
-
 class QrAuthSession {
   String? userId;
   final VideoPlatform platform; // 平台类型
@@ -16,7 +17,7 @@ class QrAuthSession {
   Rx<QRStatus> qrStatus = QRStatus.loading.obs;
   BrowserSession? _browser;
   BrowserSession? get browser => _browser;
-  late PlatformInfo  _platformInfo;
+  late PlatformInfo _platformInfo;
   PlatformInfo get platformInfo => _platformInfo;
 
   Future<void> afterRun() async {}
@@ -40,11 +41,24 @@ class QrAuthSession {
     await afterRun();
   }
 
+  Future<void> onLoginOk() async {
+    final cookies = await browser!.page!.cookies();
+    if (cookies.isNotEmpty) {
+      platformInfo.cookie = {};
+      for (var cookie in cookies) {
+        platformInfo.cookie![cookie.name] = cookie.value;
+      }
+      logger.i("updatePlatformInfo:${platformInfo.toString()}");
+      await AccountService.instance.updatePlatformInfo(userId!, platformInfo);
+      qrStatus.value = QRStatus.success;
+    }
+  }
+
   void onDestroy() {
     _browser?.close();
   }
 
-  QrAuthSession({required this.platform, required this.startUrl}){
-    _platformInfo=PlatformInfo(platform: platform);
+  QrAuthSession({required this.platform, required this.startUrl}) {
+    _platformInfo = PlatformInfo(platform: platform);
   }
 }
