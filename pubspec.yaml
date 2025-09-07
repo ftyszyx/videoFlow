@@ -23,7 +23,6 @@ dependencies:
   path_provider: ^2.1.5
   dio: ^5.8.0+1
   path: ^1.9.1
-  puppeteer: ^3.16.0
   provider: ^6.1.2
   uuid: ^4.4.0
   file_picker: ^8.0.6
@@ -39,13 +38,12 @@ dependencies:
   extended_image: ^9.1.0 #拓展Image,支持缓存
   flutter_smart_dialog: ^4.9.2 #各种弹窗 Toast/Dialog/Popup
   sticky_headers: ^0.3.0+2 #吸顶
-  lottie: ^1.4.3 #lottie动画
+  lottie: ^3.3.1 #lottie动画
   dynamic_color: ^1.8.1
-  remixicon: ^1.4.1
-  pro_image_editor: 
-    path: packages/pro_image_editor
+  remixicon: ^1.4.1  
+  puppeteer:
+    path: packages/puppeteer
 
-  # flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
   flutter_test:
@@ -56,14 +54,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
-    - assets/ffmpeg/ffmpeg.exe
-    - assets/ffmpeg/ffplay.exe
     - assets/app_config.yaml
-    - assets/chrome-win/
-    - assets/chrome-win/locales/
-    - assets/chrome-win/MEIPreload/
-    - assets/chrome-win/PrivacySandboxAttestationsPreloaded/
-    - assets/chrome-win/IwaKeyDistribution/
     - assets/lotties/
